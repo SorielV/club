@@ -1,6 +1,6 @@
 # foo
 
-> My mathematical Nuxt.js project
+> My awesome Nuxt.js project
 
 ## Build Setup
 
