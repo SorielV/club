@@ -1,5 +1,6 @@
 const Knex = require('knex')
 const knex = Knex({ client: 'pg' })
+const database = require('./../config/database')
 
 const getProperties = (data, props) => (
   [].concat(props).reduce((obj, prop) => {
@@ -108,6 +109,11 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
   }
 
   const Schema = class {
+    static get table () { return table }
+    static get primaryKey () { return [].concat(primaryKey) }
+    static get fields () { return fields }
+    static get validation () { return validation }
+
     constructor(data, validate = true) {
       const obj = Object.assign({}, proxy)
 
@@ -161,7 +167,12 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     }
 
     save () {
-      return knex(table).insert(this.data).toString()
+      const query = knex(table)
+        .insert(this.data)
+        .returning('*')
+        .toString()
+
+      return query
     }
 
     update (data) {
@@ -180,6 +191,7 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
       return knex(table)
         .where(getProperties(this.data, primaryKey))
         .update(getProperties(this.data, this.changedProperties))
+        .returning('*')
         .toString()
     }
 
@@ -207,21 +219,34 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
           if (!validation.apply(item.data, null)) throw `Inconsistencia en la informacion`
         }
       }
-      
-      return knex(table)
+
+      const query = knex(table)
         .where(getProperties(item.data, primaryKey))
         .update(getProperties(item.data, item.changedProperties))
+        .returning('*')
         .toString()
+
+      return query
     }
 
     // TODO: Delete Method
     delete () {
-
+      const query = knex(table)
+        .where(getProperties(item.data, primaryKey))
+        .delete()
+        .toString()
+      
+      return query
     }
 
     // TODO: Delete Static Method
-    static delete () {
-
+    static delete (where) {
+      const query = knex(table)
+        .where(getProperties(where, primaryKey))
+        .delete()
+        .toString()
+    
+      return query
     }
 
 
@@ -239,6 +264,7 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
   return Schema
 }
 
+
 const User = new Schema('Users', Model)
 try {
   const user = new User({
@@ -253,3 +279,6 @@ try {
   console.log('Error')
   console.log(err)
 }
+
+console.log(database)
+
