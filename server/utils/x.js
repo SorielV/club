@@ -166,6 +166,20 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
       this._isSet = true
     }
 
+    static async query(query, queryOptions) {
+      if (options.debug || queryOptions.debug) {
+        console.log(query)
+      }
+      return 
+    }
+
+    async query (query, queryOptions, {}) {
+      if (options.debug || queryOptions.debug) {
+        console.log(query)
+      }
+      return await database.query(query, queryOptions)
+    }
+
     save () {
       const query = knex(table)
         .insert(this.data)
@@ -281,4 +295,3 @@ try {
 }
 
 console.log(database)
-
