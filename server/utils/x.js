@@ -1,6 +1,6 @@
-const Knex = require('knex')
+import Knex from 'knex'
+import pool from './../config/database'
 const knex = Knex({ client: 'pg' })
-const database = require('./../config/database')
 
 const getProperties = (data, props) => (
   [].concat(props).reduce((obj, prop) => {
@@ -8,6 +8,10 @@ const getProperties = (data, props) => (
     return obj
   } , {})
 )
+
+const setOptions = ({ _orderBy: orderBy, _sortBy: sortBy, ...where }) => {
+
+}
 
 const Model = {
   table: 'Users',
@@ -27,7 +31,7 @@ const Model = {
       maxLength: 100,
       minLength: 2,
     },
-    birthDate: {
+    birthdate: {
       type: Date,
       required: true
     },
@@ -42,6 +46,7 @@ const Model = {
   },
   validation: false,
   options: {
+    debug: true,
     allowRead: true,
     allowCreate: true,
     allowUpdate: true,
@@ -50,6 +55,12 @@ const Model = {
 }
 
 function Schema(name, { table, primaryKey, fields, options, validation }) {
+  // Prevent
+  ['update', 'delete', 'find', 'findOne', 'save'].forEach((method) => {
+    if (fields[method]) {
+      throw new Error(`El nombre ${method} no puede ser usado como campo C:`)
+    }
+  })
 
   const proxy = Object.keys(fields).reduce(
     (obj, prop) => {
@@ -64,7 +75,7 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     let value = _value
 
     if ((value === undefined || value === null) & !fields[prop].allowNull) {
-      throw `Campo ${prop} no puede ser null`
+      throw new Error(`Campo ${prop} no puede ser null`)
     } else {
       value = value === undefined ? null : value
     }
@@ -79,11 +90,13 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
         if (fields[prop].trim) value = value.trim()
 
         if (fields[prop].maxLength && value.length >= fields[prop].maxLength) {
-          throw `El Campo ${prop} debera ser de longitud menor a ${fields[prop].maxLength}`
+          throw new Error(
+            `El Campo ${prop} debera ser de longitud menor a ${fields[prop].maxLength}`
+          )
         }
 
         if (fields[prop].minLength && value.length <= fields[prop].minLength) {
-          throw `Campo ${prop} debera ser de longitud mayor a ${fields[prop].minLength}`
+          throw new Error(`Campo ${prop} debera ser de longitud mayor a ${fields[prop].minLength}`)
         }
 
         if (fields[prop].lowercase) value = value.toLowerCase()
@@ -92,206 +105,293 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
 
       case Number:
         if (fields[prop].min && value > fields[prop].max) {
-          throw `Campo ${prop} debera ser menor a ${fields[prop].max}`
+          throw new Error(
+            `Campo ${prop} debera ser menor a ${fields[prop].max}`
+          )
         }
 
         if (fields[prop].max && value < fields[prop].max) {
-          throw `Campo ${prop} debera ser mayor a ${fields[prop].max}`
+          throw new Error(
+            `Campo ${prop} debera ser mayor a ${fields[prop].max}`
+          )
         }
       break
     }
 
     if (fields[prop].validation) {
-      if (!fields[prop].validation(value)) throw `Campo ${prop} invalido`
+      if (!fields[prop].validation(value)) throw new Error(`Campo ${prop} invalido`)
     }
 
     return value
   }
 
-  const Schema = class {
-    static get table () { return table }
-    static get primaryKey () { return [].concat(primaryKey) }
-    static get fields () { return fields }
-    static get validation () { return validation }
+  function Schema(data, validate = true) {    
+    for (const prop in validation ? proxy : data) {
+      this[prop] = null
+    }
+    
+    const self = new Proxy(this, {
+      set: (obj, prop, _value) => {
+        const currentValue = obj[prop]
+        const value = validateProp(obj, prop, _value)
 
-    constructor(data, validate = true) {
-      const obj = Object.assign({}, proxy)
-
-      // State Pre-Properties
-      this._isSet = false
-      this.changedProperties = []
-
-      // Proxy
-      this.data = new Proxy(validate ? obj : data, {
-        set: (obj, prop, _value) => {
-          const currentValue = obj[prop]
-          const value = validateProp(obj, prop, _value)
-
-          if (value != currentValue) {
-            if (this._isSet) {
-             if (validation && !validation.apply(obj, null)) {
-               throw `Inconsistencia en la informacion`
-             }
-             if (this.changedProperties.indexOf(prop) === -1) { 
-               this.changedProperties.push(prop)
-             }
-            }
+        if (value != currentValue) {
+          if (this.constructor.prototype._isSet) {
+           if (validation && !validation.apply(obj, null)) {
+             throw `Inconsistencia en la informacion`
+           }
+           if (this.constructor.prototype._changedProperties.indexOf(prop) === -1) { 
+             this.constructor.prototype._changedProperties.push(prop)
+           }
           }
-
-          obj[prop] = value
-          return true
         }
-        // Next Feacture Time | Datetime | Timestamps
+
+        obj[prop] = value
+        return true
+      }
+      // Next Feacture Time | Datetime | Timestamps
+    })
+
+    if (validate) {
+      [].concat(primaryKey).forEach((prop) => {
+        delete data[prop]
       })
 
-      if (validate) {
-        for (const prop in fields) {
-          if (data[prop] === null || data[prop] === undefined) {
-            if (fields[prop].default || fields[prop].allowNull) {
-              this.data[prop] = fields[prop].default || null
-            } else {
-              throw `El campo ${prop} es requirido`
-            }
+      for (const prop in fields) {
+        if (data[prop] === null || data[prop] === undefined) {
+          if (fields[prop].default || fields[prop].allowNull) {
+            this[prop] = fields[prop].default || null
           } else {
-            this.data[prop] = data[prop]
+            throw `El campo ${prop} es requirido`
           }
+        } else {
+          this[prop] = data[prop]
+        }
+      }
+    }
+
+    if (validation) {
+      if (!validation.apply(obj, null)) throw `Inconsistencia en la informacion`
+    }
+
+    this.constructor.prototype._isSet = true
+    return self
+  }
+
+  const query = async (query, queryOptions = {}) => {
+    if (options.debug || queryOptions.debug) {
+      console.log(query)
+    }
+    // Should return {field, rows}
+    return await Schema.pool.query({ text: query, ...queryOptions })
+  }
+
+  Schema.table  = table
+  Schema.primaryKey  = [].concat(primaryKey)
+  Schema.fields  = fields
+  Schema.validation  = validation
+  Schema.pool = pool
+  
+  Schema.prototype.query = query
+  Schema.prototype._isSet = false
+  Schema.prototype._changedProperties = []
+
+  Schema.prototype.save = async function() {
+    const hasPk = [].concat(primaryKey).some(
+      prop => {
+        return this[prop] !== null && this[prop] !== undefined
+      }
+    )
+    
+    if (!hasPk) {
+      const primaryKeys = [].concat(primaryKey).reduce(
+        (obj, prop) => {
+          obj[prop] = 'default'
+          return obj
+        }, {}
+      )
+
+      const { rows: [item] } = await this.query(knex(table)
+        .insert({ ...this, ...primaryKeys })
+        .returning('*')
+        .toString()
+        .replace('\'default\'', 'default')
+      )
+
+      // Reset Proxy
+      this.constructor.prototype._isSet = false
+      for(const prop in item) {
+        if (this[prop] !== item[prop]) {
+          this[prop] = item[prop]
+        }
+      }
+      this.constructor.prototype._isSet = true
+
+      return this
+    } else {
+      return this.update()
+    }
+  }
+
+  Schema.prototype.update = async function(data = null) {
+    if (data) {
+      for (const prop in data) {
+        if (fields[prop]) {
+          this[prop] = data[prop]
         }
       }
 
       if (validation) {
         if (!validation.apply(obj, null)) throw `Inconsistencia en la informacion`
       }
-
-      // State Post-Properties
-      this._isSet = true
     }
 
-    static async query(query, queryOptions) {
-      if (options.debug || queryOptions.debug) {
-        console.log(query)
-      }
-      return 
-    }
+    const { rows: [item] } = await this.query(knex(table)
+      .where(getProperties(this, primaryKey))
+      .update(getProperties(this, this._changedProperties))
+      .returning('*')
+      .toString()
+    )
 
-    async query (query, queryOptions, {}) {
-      if (options.debug || queryOptions.debug) {
-        console.log(query)
-      }
-      return await database.query(query, queryOptions)
-    }
+    return this
+  }
 
-    save () {
-      const query = knex(table)
-        .insert(this.data)
-        .returning('*')
+  Schema.getAll = async function() {
+    const { rows } = await Schema.query(
+      knex
+        .select()
+        .from(Schema.table)
         .toString()
+    )
+    return rows || []
+  }
 
-      return query
-    }
-
-    update (data) {
-      if (data) {
-        for (const prop in data) {
-          if (fields[prop]) {
-            this.data[prop] = data[prop]
-          }
-        }
-
-        if (validation) {
-          if (!validation.apply(obj, null)) throw `Inconsistencia en la informacion`
-        }
-      }
-
-      return knex(table)
-        .where(getProperties(this.data, primaryKey))
-        .update(getProperties(this.data, this.changedProperties))
-        .returning('*')
+  Schema.get = async function(options) {
+    const { rows } = await Schema.query(
+      knex
+        .select()
+        .from(Schema.table)
         .toString()
-    }
+    )
+    return rows || []
+  }
 
-    // knex.select().from(table).where(where).limit(1).toString()
-    static async update (data = {}, where = {}, plain = true) {
-      if (!data || typeof data !== 'object') throw new Error('No hay datos')
+  Schema.find = async function() {
+    const { rows } = await Schema.query(
+      knex
+        .select()
+        .from(Schema.table)
+        .toString()
+    )
+    return rows.map(data => new Schema(data, false))
+  }
 
-      const item = await this.findOne(where)
-      if (!item) throw new Error('Concidencias no encontradas')
+  Schema.getById = async function(primaryKeys) {
+    const { rows: [item] } = await Schema.query()
+    return item || null
+  }
 
-      const primaryKeys = [].concat(primaryKey).reduce(
-        (obj, prop) => {
-          obj[prop] = data[prop]
-          delete data[prop]
-          return obj
-        }, {}
-      )
+  Schema.findOne = async function() {
+    const { rows: [item] } = await Schema.query(
+      knex
+        .select()
+        .from(Schema.table)
+        .toString()
+    )
 
-      if (data) {
-        for (const prop in data) {
-          if (fields[prop]) item.data[prop] = data[prop]
-        }
+    return item 
+      ? Schema(item, false)
+      : null
+  }
 
-        if (validation) {
-          if (!validation.apply(item.data, null)) throw `Inconsistencia en la informacion`
-        }
+  Schema.prototype.query = query
+
+  Schema.update = async function(data = {}, where = {}, plain = true) {
+    if (!data || typeof data !== 'object') throw new Error('No hay datos')
+
+    const item = await Schema.findOne(where)
+    if (!item) throw new Error('Concidencias no encontradas')
+
+    const primaryKeys = [].concat(primaryKey).reduce(
+      (obj, prop) => {
+        obj[prop] = data[prop]
+        delete data[prop]
+        return obj
+      }, {}
+    )
+
+    if (data) {
+      for (const prop in data) {
+        if (fields[prop]) item.data[prop] = data[prop]
       }
 
-      const query = knex(table)
+      if (validation) {
+        if (!validation.apply(item.data, null)) throw `Inconsistencia en la informacion`
+      }
+    }
+
+    const { rows: [result] } = await this.query(
+      knex(table)
         .where(getProperties(item.data, primaryKey))
         .update(getProperties(item.data, item.changedProperties))
         .returning('*')
         .toString()
+    )
 
-      return query
-    }
+    return result
+  }
 
-    // TODO: Delete Method
-    delete () {
-      const query = knex(table)
-        .where(getProperties(item.data, primaryKey))
-        .delete()
-        .toString()
-      
-      return query
-    }
-
-    // TODO: Delete Static Method
-    static delete (where) {
-      const query = knex(table)
+  Schema.delete = async function() {
+    const result = await Schema.query(
+      knex(table)
         .where(getProperties(where, primaryKey))
         .delete()
         .toString()
-    
-      return query
-    }
+    )
+    return Boolean(result)
 
-
-    static find (_options, plain = true) {
-      const { where, _orderBy: orderBy, _order: order, groupBy: _groupBy } = _options
-    }
-
-    static findOne(_options, plain = true) {
-
-    }
   }
 
-  Object.defineProperty (Schema, 'name', {value: name})
-  console.log(`------${name} Creado------`)
   return Schema
 }
 
+/*
+const setData = (_, data, validate) => {
+  const obj = Object.assign({}, proxy)
 
-const User = new Schema('Users', Model)
-try {
-  const user = new User({
-    id: 1,
-    name: 'Nombre',
-    birthDate: 'Cumpleanios',
-    ocupacion: '12345'
-  }) 
-  user.data.name = "Juana"
-  console.log(user.update())
-} catch (err) {
-  console.log('Error')
-  console.log(err)
+  _.data = new Proxy(validate ? obj : data, {
+    set: (obj, prop, _value) => {
+      const currentValue = obj[prop]
+      const value = validateProp(obj, prop, _value)
+
+      if (value != currentValue) {
+        if (_.constructor.prototype._isSet = true_isSet) {
+          if (validation && !validation.apply(obj, null)) {
+            throw new Error(`Inconsistencia en la informacion`)
+          }
+          if (_.changedProperties.indexOf(prop) === -1) { 
+            _.changedProperties.push(prop)
+          }
+        }
+      }
+
+      obj[prop] = value
+      return true
+    }
+    // Next Feacture Time | Datetime | Timestamps
+  })
 }
+*/
 
-console.log(database)
+
+// API
+const Api = new Proxy({}, {
+  get(target, api) {
+    return ['get', 'post', 'put', 'delete'].reduce((obj, method) => {
+      obj[method] = (params, ...args) => (
+        axios[method](api + params, ...args)
+      )
+      return obj
+    }, {})
+  }
+})

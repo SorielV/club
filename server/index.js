@@ -22,6 +22,9 @@ async function start() {
     await builder.build()
   }
 
+  app.get('/v1', (req, res) => {
+    return res.status(200).json(req.query).end()
+  })
   // Give nuxt middleware to express
   app.use(nuxt.render)
 
