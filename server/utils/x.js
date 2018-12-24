@@ -1,58 +1,13 @@
 import Knex from 'knex'
 import pool from './../config/database'
 const knex = Knex({ client: 'pg' })
-
-const getProperties = (data, props) => (
-  [].concat(props).reduce((obj, prop) => {
-    obj[prop] = data[prop]
-    return obj
-  } , {})
-)
-
-const setOptions = ({ _orderBy: orderBy, _sortBy: sortBy, ...where }) => {
-
-}
-
-const Model = {
-  table: 'Users',
-  primaryKey: 'id',
-  fields: {
-    id: {
-      type: Number,
-      required: false,
-      allowNull: true,
-      default: null
-    },
-    name: {
-      type: String,
-      required: true,
-      allowNull: false,
-      lowercase: true,
-      maxLength: 100,
-      minLength: 2,
-    },
-    birthdate: {
-      type: Date,
-      required: true
-    },
-    ocupacion: {
-      type: String,
-      required: true,
-      lowercase: true,
-      validation(prop) {
-        return prop.length < 6
-      },
-    }
-  },
-  validation: false,
-  options: {
-    debug: true,
-    allowRead: true,
-    allowCreate: true,
-    allowUpdate: true,
-    allowDelete: true
-  }
-}
+import {
+  getProperties,
+  formatOptions,
+  formatAllowedOptions,
+  slugify
+} from './format'
+import { userInfo } from 'os';
 
 function Schema(name, { table, primaryKey, fields, options, validation }) {
   // Prevent
@@ -125,6 +80,22 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     return value
   }
 
+  const knexMethod = (query, option, options) => {
+    if (options[option] === null || options[option] === undefined) {
+      return query
+    }
+
+    if (!Array.isArray(options[option])) {
+      // Should be array of array
+      return query[option](options[option])
+    }
+
+    return options[option].reduce(
+      (query, value) => query[option](...value),
+      query
+    )
+  }
+
   function Schema(data, validate = true) {    
     for (const prop in validation ? proxy : data) {
       this[prop] = null
@@ -189,8 +160,10 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
   Schema.table  = table
   Schema.primaryKey  = [].concat(primaryKey)
   Schema.fields  = fields
+  Schema.fieldsName = Object.keys(fields)
   Schema.validation  = validation
   Schema.pool = pool
+  Schema.query = query
   
   Schema.prototype.query = query
   Schema.prototype._isSet = false
@@ -256,33 +229,43 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     return this
   }
 
-  Schema.getAll = async function() {
-    const { rows } = await Schema.query(
+  Schema.getAll = async function(_options = {}) {
+    const options =
+      formatAllowedOptions(_options, { table: Schema.table })
+
+    const query = ['select', 'from', 'orderBy'].reduce(
+      (query, option) => knexMethod(query, option, options),
       knex
-        .select()
-        .from(Schema.table)
-        .toString()
-    )
+    ).toString()
+
+    const { rows } = await Schema.query(query)
     return rows || []
   }
 
-  Schema.get = async function(options) {
-    const { rows } = await Schema.query(
-      knex
-        .select()
-        .from(Schema.table)
-        .toString()
+  Schema.get = async function(_options) {
+    const options = formatAllowedOptions(
+      _options,
+      { table: Schema.table, allowed: Schema.fieldsName }
     )
+
+    console.log(options, _options)
+
+    const query = Object.keys(options).reduce(
+      (query, option) => knexMethod(query, option, options),
+      knex
+    ).toString()
+
+    const { rows } = await Schema.query(query)
     return rows || []
   }
 
-  Schema.find = async function() {
-    const { rows } = await Schema.query(
-      knex
-        .select()
-        .from(Schema.table)
-        .toString()
+  Schema.find = async function(_options) {
+    const options = formatAllowedOptions(
+      _options, { table: Schema.table }
     )
+    const query = Object.keys(options).reduce(knexMethod, knex)
+
+    const { rows } = await Schema.query(query)
     return rows.map(data => new Schema(data, false))
   }
 
@@ -291,13 +274,20 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     return item || null
   }
 
-  Schema.findOne = async function() {
-    const { rows: [item] } = await Schema.query(
+  Schema.findOne = async function(_options) {
+    const { 
+      select = '*',
+      where = null,
+      orderBy = null
+    } = formatAllowedOptions(_options)
+
+    const query = ['select', 'from', 'where', 'orderBy'].reduce(
+      knexMethod,
       knex
-        .select()
-        .from(Schema.table)
-        .toString()
     )
+
+    const { rows: [item] } = await Schema.query(query)
+    return rows || []
 
     return item 
       ? Schema(item, false)
@@ -355,43 +345,66 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
   return Schema
 }
 
-/*
-const setData = (_, data, validate) => {
-  const obj = Object.assign({}, proxy)
+// module.exports = Schema
 
-  _.data = new Proxy(validate ? obj : data, {
-    set: (obj, prop, _value) => {
-      const currentValue = obj[prop]
-      const value = validateProp(obj, prop, _value)
-
-      if (value != currentValue) {
-        if (_.constructor.prototype._isSet = true_isSet) {
-          if (validation && !validation.apply(obj, null)) {
-            throw new Error(`Inconsistencia en la informacion`)
-          }
-          if (_.changedProperties.indexOf(prop) === -1) { 
-            _.changedProperties.push(prop)
-          }
-        }
-      }
-
-      obj[prop] = value
-      return true
+const Model = {
+  table: 'Users',
+  primaryKey: 'id',
+  fields: {
+    id: {
+      type: Number,
+      required: false,
+      allowNull: true,
+      default: null
+    },
+    name: {
+      type: String,
+      required: true,
+      allowNull: false,
+      lowercase: true,
+      maxLength: 100,
+      minLength: 2,
+    },
+    birthdate: {
+      type: Date,
+      required: true
+    },
+    ocupacion: {
+      type: String,
+      required: true,
+      lowercase: true,
+      validation(prop) {
+        return prop.length < 6
+      },
     }
-    // Next Feacture Time | Datetime | Timestamps
-  })
-}
-*/
-
-
-// API
-const Api = new Proxy({}, {
-  get(target, api) {
-    return ['get', 'post', 'put', 'delete'].reduce((obj, method) => {
-      obj[method] = (params, ...args) => (
-        axios[method](api + params, ...args)
-      )
-      return obj
-    }, {})
+  },
+  validation: false,
+  options: {
+    debug: true,
+    allowRead: true,
+    allowCreate: true,
+    allowUpdate: true,
+    allowDelete: true
   }
-})
+}
+
+
+
+const User = new Schema('Users', Model)
+console.time('getAll')
+
+User.get({ 'id': 11 })
+  .then((data) => {
+    console.timeEnd('getAll')
+    console.log(data.length)
+  })
+  .catch(console.log)
+
+/*
+console.time('getAll Simple')
+User.query('select * from "Users";')
+  .then((data) => {
+    console.timeEnd('getAll Simple')
+    console.log(data.length)
+  })
+*/
