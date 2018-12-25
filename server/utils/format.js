@@ -87,7 +87,7 @@ const formatAllowedOptions = ({
       } else if (simbol.match(/[!~]/)) {
         obj.push([
           field,
-          simbol === '!' ? '!=' : 'like',
+          simbol === '! ' ? '!=' : 'like',
           _where[prop]
         ])
       }

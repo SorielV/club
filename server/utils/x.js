@@ -391,16 +391,15 @@ const Model = {
 
 
 const User = new Schema('Users', Model)
-console.time('getAll')
 
-User.get({ 'id': 11 })
+/*
+User.get({ 'id>': 11, 'name!': null })
   .then((data) => {
     console.timeEnd('getAll')
     console.log(data.length)
   })
   .catch(console.log)
 
-/*
 console.time('getAll Simple')
 User.query('select * from "Users";')
   .then((data) => {
