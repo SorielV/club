@@ -1,11 +1,15 @@
 const Model = {
-  table: 'Clubs',
+  table: 'ClubInfo',
   primaryKey: ['id'],
   fields: {
     id: {
       type: Number,
       required: false,
       allowNull: true,
+    },
+    idClub: {
+      type: Number,
+      required: true
     },
     idUser: {
       type: Number,
@@ -14,15 +18,8 @@ const Model = {
     description: {
       type: String,
       allowNull: true,
-      trim: true,
-      maxLength: 255
-    },
-    visibility: {
-      type: Number,
-      allowNull: false,
-      min: 0,
-      max: 4
-    },
+      maxLength: 1200
+    },,
     createdAt: {
       type: Date,
       allowNull: true,

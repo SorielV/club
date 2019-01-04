@@ -1,7 +1,9 @@
 import Knex from 'knex'
 import pool from './../config/database'
 const knex = Knex({ client: 'pg' })
+
 import {
+  knexMethod,
   getProperties,
   formatOptions,
   formatAllowedOptions,
@@ -78,22 +80,6 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     }
 
     return value
-  }
-
-  const knexMethod = (query, option, options) => {
-    if (options[option] === null || options[option] === undefined) {
-      return query
-    }
-
-    if (!Array.isArray(options[option])) {
-      // Should be array of array
-      return query[option](options[option])
-    }
-
-    return options[option].reduce(
-      (query, value) => query[option](...value),
-      query
-    )
   }
 
   function Schema(data, validate = true) {    

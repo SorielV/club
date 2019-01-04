@@ -1,27 +1,22 @@
 const Model = {
-  table: 'Clubs',
+  table: 'User',
   primaryKey: ['id'],
   fields: {
     id: {
       type: Number,
       required: false,
       allowNull: true,
+      default: 'default'
     },
-    idUser: {
-      type: Number,
+    username: {
+      type: String,
       required: true
     },
-    description: {
+    password: {
       type: String,
       allowNull: true,
       trim: true,
       maxLength: 255
-    },
-    visibility: {
-      type: Number,
-      allowNull: false,
-      min: 0,
-      max: 4
     },
     createdAt: {
       type: Date,

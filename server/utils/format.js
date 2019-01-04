@@ -1,3 +1,33 @@
+// Include fields
+const include = function (fields, nestedName = null) {
+  return fields.reduce((arr, field) => {
+    if (this.includes(field)) {
+      arr.push(`"${nestedName}"."${field}" ` + (
+        nestedName
+          ? `as "${nestedName.toLowerCase()}.${field}"`
+          : ''
+        )
+      )
+    }
+    return arr
+  }, [])
+}
+
+// Exclude fields 
+const exclude = function (fields, nestedName = null) {
+  return this.reduce((arr, field) => {
+    if (!fields.includes(field)) {
+      arr.push(`"${nestedName}"."${field}" ` + (
+        nestedName
+          ?  `as "${nestedName.toLowerCase()}.${field}"`
+          : ''
+        )
+      )
+    }
+    return arr
+  }, [])
+}
+
 const formatFields = (data) => {
   return !data.includes('(') 
     ? data.split(',')
@@ -194,6 +224,22 @@ const slugify = (text) => {
     .replace(/\-\-+/g, '-') // Replace multiple - with single -
     .replace(/^-+/, '') // Trim - from start of text
     .replace(/-+$/, '') // Trim - from end of text
+}
+
+const knexMethod = (query, option, options) => {
+  if (options[option] === null || options[option] === undefined) {
+    return query
+  }
+
+  if (!Array.isArray(options[option])) {
+    // Should be array of array
+    return query[option](options[option])
+  }
+
+  return options[option].reduce(
+    (query, value) => query[option](...value),
+    query
+  )
 }
 
 export { getProperties, formatFields, formatOptions, formatAllowedOptions, slugify }

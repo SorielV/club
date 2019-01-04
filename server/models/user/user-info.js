@@ -1,33 +1,38 @@
 const Model = {
-  table: 'Clubs',
+  table: 'UserInfo',
   primaryKey: ['id'],
   fields: {
     id: {
       type: Number,
       required: false,
       allowNull: true,
+      default: 'default'
     },
     idUser: {
-      type: Number,
+      type: String,
       required: true
     },
-    description: {
+    firstName: {
       type: String,
       allowNull: true,
       trim: true,
       maxLength: 255
     },
-    visibility: {
-      type: Number,
-      allowNull: false,
-      min: 0,
-      max: 4
-    },
-    createdAt: {
+    lastName: {
       type: Date,
       allowNull: true,
       trim: true,
       maxLength: 255
+    },
+    profileImage: {
+      type: String,
+      allowNull: true,
+      trim: true,
+      maxLength: 255
+    },
+    createdAt: {
+      type: Date,
+      allowNull: true
     },
     updatedAt: {
       type: Date,
