@@ -1,4 +1,6 @@
-const Model = {
+import Schemata from './../../utils/Schema'
+
+export const Model = {
   table: 'UserInfo',
   primaryKey: ['id'],
   fields: {
@@ -49,4 +51,7 @@ const Model = {
   }
 }
 
-export default Model
+const UserSchema = new Schemata('User', Model)
+
+export const Schema = UserSchema
+export default UserSchema

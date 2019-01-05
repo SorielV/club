@@ -1,8 +1,8 @@
 import Knex from 'knex'
-import { User } from './../../../../../models/user/'
-import UserInfo from './../../../../../models/user/user-info'
-import { include, exclude, formatAllowedOptions }  from './../../../../../utils/format'
 const knex = Knex({ client: 'pg' })
+
+import { User } from './../../../../../models/user/'
+import { formatAllowedOptions, knexMethod }  from './../../../../../utils/format'
 
 const UserProfile = {
   table: 'UserProfile',
@@ -11,6 +11,10 @@ const UserProfile = {
     username: null,
     profileImage: null,
     firstName: null
+  },
+  allowedFilter: {
+    idUser: null,
+    username: null
   }
 }
 
@@ -24,6 +28,10 @@ const UserProfileInfo = {
     lastName: null,
     about: null,
     school: null
+  },
+  allowedFilter: {
+    idUser: null,
+    username: null
   }
 }
 
@@ -44,11 +52,11 @@ const getProfileQuery = (_options) => {
     }
   )
 
-  return query = knexMethod(
-    Object.keys(options).reduce(
+  return Object.keys(options)
+    .reduce(
       (query, option) => knexMethod(query, option, options), knex
     )
-  ).toString()
+    .toString()
 }
 
 const getProfileInfoQuery = (_options) => {
@@ -60,30 +68,33 @@ const getProfileInfoQuery = (_options) => {
     }
   )
 
-  return query = knexMethod(
-    Object.keys(options).reduce(
+  return Object.keys(options)
+    .reduce(
       (query, option) => knexMethod(query, option, options), knex
     )
-  ).toString()
+    .toString()
 }
 
-
-User.prototype.getProfile = async function(options, short = true) {
-  const { rows: [item] } = await Club.query(
+User.getProfile = async function(options, short = true) {
+  const { rows: [item] } = await User.query(
     short
       ? getProfileQuery({ ...options, limit: 1 })
       : getProfileInfoQuery({ ...options, limit: 1 })
   )
-  return rows || [item]
+  return item || {}
 }
 
-User.prototype.getProfiles = async function(options, short = true) {
-  const { rows } = await Club.query(
+User.getProfiles = async function(options, short = true) {
+  const { rows } = await User.query(
     short
       ? getProfileQuery(options)
       : getProfileInfoQuery(options)
   )
   return rows || []
 }
+
+User.getProfiles({ username: 'Soriel' })
+  .then(console.log)
+  .catch(console.error)
 
 export default User

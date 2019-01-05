@@ -1,4 +1,6 @@
-const Model = {
+import Schemata from './../../utils/Schema'
+
+export const Model = {
   table: 'ClubInfo',
   primaryKey: ['id'],
   fields: {
@@ -19,7 +21,7 @@ const Model = {
       type: String,
       allowNull: true,
       maxLength: 1200
-    },,
+    },
     createdAt: {
       type: Date,
       allowNull: true,
@@ -41,4 +43,7 @@ const Model = {
   }
 }
 
-export default Model
+const ClubInfo = new Schemata('ClubInfo', Model)
+
+export const Schema = ClubInfo
+export default ClubInfo

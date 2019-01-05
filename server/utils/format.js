@@ -91,8 +91,6 @@ const formatAllowedOptions = ({
     []
   )
 
-  console.log(_where)
-
   const where = Object.keys(_where).reduce(
     (obj, prop) => {
       const simbol = prop[prop.length - 1]
@@ -117,7 +115,7 @@ const formatAllowedOptions = ({
       } else if (simbol.match(/[!~]/)) {
         obj.push([
           field,
-          simbol === '! ' ? '!=' : 'like',
+          simbol === '!' ? '!=' : 'like',
           _where[prop]
         ])
       }
@@ -137,8 +135,6 @@ const formatAllowedOptions = ({
   result.select = fields
   result.from = table
 
-  console.log(where)
-
   if (where.length) result.where = where
   if (orderBy.length) result.orderBy = orderBy
   if (_limit) result.limit = Number.parseInt(_limit)
@@ -147,6 +143,7 @@ const formatAllowedOptions = ({
   return result
 }
 
+/*
 const formatOptions = ({
   _sort,
   _limit = 50,
@@ -207,6 +204,7 @@ const formatOptions = ({
     where
   }
 }
+*/
 
 const getProperties = (data, props) => (
   [].concat(props).reduce((obj, prop) => {
@@ -226,7 +224,7 @@ const slugify = (text) => {
     .replace(/-+$/, '') // Trim - from end of text
 }
 
-const knexMethod = (query, option, options) => {
+const knexMethod = (query, option, options = {}) => {
   if (options[option] === null || options[option] === undefined) {
     return query
   }
@@ -242,4 +240,4 @@ const knexMethod = (query, option, options) => {
   )
 }
 
-export { getProperties, formatFields, formatOptions, formatAllowedOptions, slugify }
+export { knexMethod, getProperties, formatFields, formatAllowedOptions, slugify }

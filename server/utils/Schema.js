@@ -136,7 +136,7 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
   }
 
   const query = async (query, queryOptions = {}) => {
-    if (options.debug || queryOptions.debug) {
+    if ((Schema.options && Schema.options.debug) || queryOptions.debug) {
       console.log(query)
     }
     // Should return {field, rows}
@@ -148,6 +148,7 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
   Schema.fields  = fields
   Schema.fieldsName = Object.keys(fields)
   Schema.validation  = validation
+  Schema.options = options
   Schema.pool = pool
   Schema.query = query
   

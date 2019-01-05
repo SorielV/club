@@ -1,32 +1,48 @@
 import Knex from 'knex'
 const knex = Knex({ client: 'pg' })
+
 import { Club } from './../../../../../models/club/'
-import ClubInfo from './../../../../../models/club/club-info'
+import { Model as ClubInfo } from './../../../../../models/club/club-info'
+import { formatAllowedOptions, knexMethod } from './../../../../../utils/format'
 
-const UserClub = {
-  table: 'Club',
+// Vistas
+const VClub = {
+  table: 'VClub',
   fields: {
+    id: null,
+    identifier: null,
+    description: null,
     idUser: null,
     username: null,
-    ClubImage: null,
-    firstName: null
-  }
-}
-
-const ClubInfo = {
-  table: 'UserClubInfo',
-  fields: {
-    idUser: null,
-    username: null,
-    ClubImage: null,
     firstName: null,
-    lastName: null,
-    about: null,
-    school: null
+    profileImage: null,
+    createdAt: null
+  },
+  allowedFilter: {
+    identifier: null,
+    idUser: null,
+    username: null
   }
 }
 
-// TODO: Change knewMethods (bind) 'r'
+const VClubInfo = {
+  table: 'VClubInfo',
+  fields: {
+    id: null,
+    identifier: null,
+    content: null,
+    idUser: null,
+    username: null,
+    firstName: null,
+    profileImage: null,
+    createdAt: null
+  },
+  allowedFilter: {
+    identifier: null,
+    idUser: null,
+    username: null
+  }
+}
 
 /**
  * API
@@ -38,50 +54,50 @@ const getClubQuery = (_options) => {
   const { ...options } = formatAllowedOptions(
     _options,
     {
-      table: UserClub.table,
-      allowed: Object.keys(UserClub.fields)
+      table: VClub.table,
+      allowed: Object.keys(VClub.allowedFilter)
     }
   )
 
-  return query = knexMethod(
-    Object.keys(options).reduce(
+  return Object.keys(options)
+    .reduce(
       (query, option) => knexMethod(query, option, options), knex
     )
-  ).toString()
+    .toString()
 }
 
 const getClubInfoQuery = (_options) => {
   const { ...options } = formatAllowedOptions(
     _options,
     {
-      table: UserClubInfo.table,
-      allowed:  Object.keys(UserClubInfo.fields)
+      table: VClubInfo.table,
+      allowed:  Object.keys(VClubInfo.allowedFilter)
     }
   )
 
-  return query = knexMethod(
-    Object.keys(options).reduce(
+  return Object.keys(options)
+    .reduce(
       (query, option) => knexMethod(query, option, options), knex
     )
-  ).toString()
+    .toString()
 }
 
-Club.prototype.getClubs = async function(_options) {
-  const { where, ...options } = formatAllowedOptions(
-    { ..._options, _fields: include.apply(Club) },
-    { table: Schema.table, allowed: Club.fieldsName }
+Club.getClub = async function(options, short = true) {
+  const { rows: [item] } = await Club.query(
+    short
+      ? getClubQuery({ ...options, limit: 1 })
+      : getClubInfoQuery({ ...options, limit: 1 })
   )
+  return item || {}
+}
 
-
-  const query = knexMethod(
-    Object.keys(options).reduce(
-      (query, option) => knexMethod(query, option, options), knex
-    ),
-    where,
-  ).innerJoin()
-
-  const { rows } = await Club.query(query)
+Club.getClubs = async function(options, short = true) {
+  const { rows } = await Club.query(
+    short
+      ? getClubQuery(options)
+      : getClubInfoQuery(options)
+  )
   return rows || []
 }
 
-export default User
+export default Club

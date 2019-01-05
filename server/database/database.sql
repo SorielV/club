@@ -65,6 +65,7 @@ CREATE TABLE "Club"(
   "identifier" varchar(20) unique not null,
   "slug" varchar(20) unique not null,
   "description" varchar(255) null,
+  "visibility" smallint default 1,
   "createdAt" date default current_timestamp,
   "updatedAt" date null
 );
@@ -77,3 +78,20 @@ CREATE TABLE "ClubInfo"(
   "createdAt" date default current_timestamp,
   "updatedAt" date null
 );
+
+
+-- Info (busquedas, muestra general, etc)
+CREATE VIEW "VClub" as (
+  select "Club".id, "Club".identifier, "Club".description, "UserProfile".*, "Club"."createdAt" from "Club"
+    inner join "UserProfile" on "Club"."idUser" = "UserProfile"."idUser"
+);
+
+-- Vista concrate de un Club
+CREATE VIEW "VClubInfo" as (
+  select "Club".id, "Club".identifier, "ClubInfo".content, "UserProfile".*, "Club"."createdAt" from "Club"
+    inner join "ClubInfo" on "Club".id = "ClubInfo"."idClub"
+    inner join "UserProfile" on "Club"."idUser" = "UserProfile"."idUser"
+);
+
+select * from "VClubInfo";
+select * from "VClub";
