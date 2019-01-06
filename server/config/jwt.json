@@ -1,0 +1,6 @@
+{
+  "secret": "Nyan Cat :0 :3 <3",
+  "refreshTokenSecret": "Nyan Cat :0 :3 <3",
+  "tokenLife": 9000,
+  "refreshTokenLife": 86400
+}

@@ -1,4 +1,4 @@
-const catchException = fn => (req, res, next) => {
+export const ErrorHandle = fn => (req, res, next) => {
   Promise
     .resolve(fn(req, res, next))
     .catch(err => {
@@ -9,5 +9,3 @@ const catchException = fn => (req, res, next) => {
         .end()
     })
 }
-
-export { catchException }

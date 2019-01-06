@@ -79,6 +79,14 @@ CREATE TABLE "ClubInfo"(
   "updatedAt" date null
 );
 
+CREATE TABLE "ClubMember"(
+  "id" serial unique primary key,
+  "idClub" integer references "Club"(id),
+  "idUser" integer references "User"(id),
+  "rol" smallint default 0,
+  "createdAt" date default current_timestamp,
+  "updatedAt" date null
+)
 
 -- Info (busquedas, muestra general, etc)
 CREATE VIEW "VClub" as (

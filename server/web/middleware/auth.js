@@ -26,7 +26,7 @@ const authInformation = req => {
 /** Required Auth **/
 
 // Normal Auth
-const handleAuth = async (req, res, next) => {
+export const HandleAuth = async (req, res, next) => {
   try {
     const {
       user, token
@@ -43,7 +43,7 @@ const handleAuth = async (req, res, next) => {
 }
 
 // Normal Authorization
-const isAuth = async (req, res, next) => {
+export const isAuth = async (req, res, next) => {
   if (req.user) {
     return next()
   } else {
@@ -62,7 +62,7 @@ const isAuth = async (req, res, next) => {
 }
 
 // Privileged Authorization
-const isAdmin = async (req, res, next) => {
+export const isAdmin = async (req, res, next) => {
   if (req.user &&  req.user.type === ADMIN) {
     return next()
   } else {
@@ -79,5 +79,3 @@ const isAdmin = async (req, res, next) => {
     }
   }
 }
-
-export { HandleAuth, isAuth, isAdmin }

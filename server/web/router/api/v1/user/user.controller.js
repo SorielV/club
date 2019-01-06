@@ -1,8 +1,9 @@
 import Knex from 'knex'
 const knex = Knex({ client: 'pg' })
 
-import { User } from './../../../../../models/user/'
+import { User, UserInfo } from './../../../../../models/user/'
 import { formatAllowedOptions, knexMethod }  from './../../../../../utils/format'
+import { createRequireFromPath } from 'module';
 
 const UserProfile = {
   table: 'UserProfile',
@@ -96,5 +97,39 @@ User.getProfiles = async function(options, short = true) {
 User.getProfiles({ username: 'Soriel' })
   .then(console.log)
   .catch(console.error)
+
+
+const API = {
+  create: async (req, res, next) => {
+    const user = new User(req.body)
+    const userInfo = new UserInfo({ ...req.body, idUser: null })
+    try {
+      await user.save()
+      await userInfo.save({ ...req.body, idUser: user.id })
+      return res
+        .status(200)
+        .json({ data: {
+
+        }})
+    } catch(error) {
+
+    }
+    return user.save()
+      .then(({ id: idUser }) => {
+        userInfo.idUser = idUser
+        return userInfo.save()
+      })
+      .then(userInfo => {
+        res.status(200)
+      })
+  },
+  updateUser: async (req, res, next) => {
+    const user = await User.
+
+  },
+  updateUserInfo: async (req, res, next) => {
+
+  }
+}
 
 export default User

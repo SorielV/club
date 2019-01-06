@@ -1,7 +1,10 @@
 
-const express = require('express')
-const consola = require('consola')
-const { Nuxt, Builder } = require('nuxt')
+
+import express from 'express'
+import consola from 'consola'
+import { Nuxt, Builder } from 'nuxt'
+import ClubAPI from './web/router/api/v1/club/club.api'
+
 const app = express()
 const host = process.env.HOST || '127.0.0.1'
 const port = process.env.PORT || 3000
@@ -26,6 +29,7 @@ async function start() {
     return res.status(200).json(req.query).end()
   })
   // Give nuxt middleware to express
+  app.use('/v1/club', ClubAPI)
   app.use(nuxt.render)
 
   // Listen the server

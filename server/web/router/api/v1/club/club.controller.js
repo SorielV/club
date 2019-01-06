@@ -1,8 +1,7 @@
 import Knex from 'knex'
 const knex = Knex({ client: 'pg' })
 
-import { Club } from './../../../../../models/club/'
-import { Model as ClubInfo } from './../../../../../models/club/club-info'
+import { Club, ClubInfo, ClubMember } from './../../../../../models/club/'
 import { formatAllowedOptions, knexMethod } from './../../../../../utils/format'
 
 // Vistas
@@ -44,12 +43,6 @@ const VClubInfo = {
   }
 }
 
-/**
- * API
- * Endpoints
- * .../Club/[Username|idUser] => get
- * .../Club[/[id]] => post, put, delete
-*/
 const getClubQuery = (_options) => {
   const { ...options } = formatAllowedOptions(
     _options,
@@ -100,4 +93,63 @@ Club.getClubs = async function(options, short = true) {
   return rows || []
 }
 
-export default Club
+
+/**
+ * API
+ * Endpoints
+ * .../Club/[Username|idUser] => get
+ * .../Club[/[id]] => post, put, delete
+*/
+const API = {
+  createClub: async (req, res, next) => {
+    const { id: idUser } = req.user
+    const item = await new Club(req.body, idUser).save()
+    const member = await new ClubMember({ idClub: item.id, idUser }).save()
+
+    return res
+      .status(201)
+      .json({ data: item })
+      .end()
+  },
+  getClub: async (req, res, next) => {
+    const format = req.query.format && req.query.format === 'complete'
+    const items = await Club.getClub({ id: req.params.id }, format)
+    return res
+      .status(200)
+      .json({ data: items })
+      .end()
+  },
+  getClubs: async (req, res, next) => {
+    const format = req.query.format && req.query.format === 'complete'
+    const items = await Club.getClubs(req.query, format)
+    return res
+      .status(200)
+      .json({ data: items })
+      .end()
+  },
+  updateClub: async (req, res, next) => {
+    const item = await Club.update(req.body, { id: req.params.id })
+    return res
+      .status(200)
+      .json({ data: item })
+      .end()
+  },
+  updateClubInfo: async (req, res, next) => {
+    const item = await ClubInfo.update(req.body, { id: req.params.id })
+    return res
+      .status(200)
+      .json({ data: item })
+      .end()
+  },
+  deleteClub: async (req, res, next) => {
+    const idClub = Number.parseInt(req.params.id)
+    await Club.delete({ id: idClub })
+    await ClubInfo.delete({ idClub })
+    return res
+      .status(200)
+      .end()
+  }
+}
+
+export { Club, ClubInfo, ClubMember }
+export default API

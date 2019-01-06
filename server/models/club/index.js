@@ -1,10 +1,3 @@
-import ClubModel from './club'
-import Schema from './../../utils/Schema'
-
-const Club = new Schema('Club', ClubModel)
-
-const Model = {
-  Club: ClubModel
-}
-
-export { Model, Club }
+export { default as Club } from './club'
+export { default as ClubInfo } from './info'
+export { default as ClubMember } from './member'
