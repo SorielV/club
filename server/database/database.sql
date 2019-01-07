@@ -47,18 +47,6 @@ CREATE VIEW "UserProfileInfo" AS (
       on "User".id = "UserInfo"."idUser"
 );
 
-CREATE TABLE "Tag"(
-  "id" serial unique primary key,
-  "tag" varchar(20) not null,
-  "slug" varchar(20) not null unique
-);
-
-CREATE TABLE "Topic"(
-  "id" serial unique primary key,
-  "topic" varchar(20) not null,
-  "slug" varchar(20) not null unique
-);
-
 CREATE TABLE "Club"(
   "id" serial unique primary key,
   "idUser" integer references "User"(id),
@@ -88,10 +76,6 @@ CREATE TABLE "ClubMember"(
   "updatedAt" date null
 );
 
-CREATE TABLE "Blog"(
-
-);
-
 -- Info (busquedas, muestra general, etc)
 CREATE VIEW "VClub" as (
   select "Club".id, "Club".identifier, "Club".description, "UserProfile".*, "Club"."createdAt" from "Club"
@@ -105,5 +89,66 @@ CREATE VIEW "VClubInfo" as (
     inner join "UserProfile" on "Club"."idUser" = "UserProfile"."idUser"
 );
 
-select * from "VClubInfo";
-select * from "VClub";
+CREATE TABLE "Blog"(
+  "id" serial unique primary key,
+  "idClub" integer references "Club"(id),
+  "idUser" integer references "User"(id),
+  "title" varchar(20) not null,
+  "slug" varchar(20),
+  "description" varchar(255) null,
+  "content" text not null,
+  "visibility" smallint default 1,
+  "createdAt" date default current_timestamp,
+  "updatedAt" date null
+);
+
+CREATE VIEW "VBlog" as (
+  select
+    "Blog"."id",
+    "Blog"."idClub",
+    "Blog"."idUser",
+    "Blog"."title",
+    "Blog"."slug",
+    "Blog"."description",
+    "Blog"."visibility",
+    "UserProfile"."username",
+    "UserProfile"."profileImage",
+    "UserProfile"."firstName",
+    "Blog"."createdAt",
+    "Blog"."updatedAt"
+  from "Blog" inner join "UserProfile" using ("idUser")
+);
+
+CREATE TABLE "Tag"(
+  "id" serial unique primary key,
+  "tag" varchar(20) not null,
+  "slug" varchar(20) not null unique
+);
+
+CREATE TABLE "BlogTag"(
+  "id" serial unique primary key,
+  "idBlog" integer references "Blog"(id),
+  "idTag" integer references "Tag"(id)
+);
+
+CREATE VIEW "VBlogTag" as (
+  select "BlogTag"."idBlog", "Tag"."id", "Tag".tag, "Tag".slug from "BlogTag" inner join "Tag" on "BlogTag"."idTag" = "Tag".id
+);
+
+CREATE TABLE "Topic"(
+  "id" serial unique primary key,
+  "topic" varchar(20) not null,
+  "slug" varchar(20) not null unique
+);
+
+CREATE VIEW "VBlogTopic" as (
+  select "BlogTopic"."idBlog", "Topic"."id", "Topic".topic, "Topic".slug from "BlogTopic" inner join "Topic" on "BlogTopic"."idTopic" = "Topic".id
+);
+
+CREATE TABLE "BlogTopic"(
+  "id" serial unique primary key,
+  "idBlog" integer references "Blog"(id),
+  "idTopic" integer references "Topic"(id)
+);
+
+select * from "VBlog";

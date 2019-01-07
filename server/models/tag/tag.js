@@ -1,7 +1,7 @@
-import Schemata from '../../../utils/Schema'
+import Schemata from './../../../utils/Schema'
 
 export const Model = {
-  table: 'BlogTag',
+  table: 'Tag',
   primaryKey: ['id'],
   fields: {
     id: {
@@ -9,15 +9,15 @@ export const Model = {
       required: false,
       default: 'default'
     },
-    idBlog: {
-      type: Number,
-      required: false,
-      default: 'true'
+    tag: {
+      type: String,
+      required: true,
+      maxLength: 20
     },
-    idTag: {
-      type: Number,
-      required: false,
-      default: 'true'
+    slug: {
+      type: String,
+      required: true,
+      maxLength: 20
     }
   }
 }
