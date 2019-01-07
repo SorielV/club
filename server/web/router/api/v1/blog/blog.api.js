@@ -1,16 +1,16 @@
 import { Router } from 'express'
-import Controller from './club.controller'
+import Controller from './blog.controller'
 import { ErrorHandle, HandleAuth, isAuth, isAdmin } from './../../../../middleware'
 
 const router = Router()
 
 router
-  .get('/', ErrorHandle(Controller.getClubs))
-  .get('/:id', ErrorHandle(Controller.getClub))
+  .get('/', ErrorHandle(Controller.getBlogs))
+  .get('/:id', ErrorHandle(Controller.getBlog))
   //.use(HandleAuth, isAuth)
-  .post('/', ErrorHandle(Controller.createClub))
-  .put('/:id', ErrorHandle(Controller.updateClub))
-  .delete('/:id', ErrorHandle(Controller.deleteClub))
+  .post('/', ErrorHandle(Controller.createBlog))
+  .put('/:id', ErrorHandle(Controller.updateBlog))
+  .delete('/:id', ErrorHandle(Controller.deleteBlog))
 
 export default router
 

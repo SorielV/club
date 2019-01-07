@@ -86,7 +86,11 @@ CREATE TABLE "ClubMember"(
   "rol" smallint default 0,
   "createdAt" date default current_timestamp,
   "updatedAt" date null
-)
+);
+
+CREATE TABLE "Blog"(
+
+);
 
 -- Info (busquedas, muestra general, etc)
 CREATE VIEW "VClub" as (
