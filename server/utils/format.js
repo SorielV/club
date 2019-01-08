@@ -1,34 +1,67 @@
 // Include fields
-const include = function (fields, nestedName = null) {
-  return fields.reduce((arr, field) => {
-    if (this.includes(field)) {
-      arr.push(`"${nestedName}"."${field}" ` + (
-        nestedName
-          ? `as "${nestedName.toLowerCase()}.${field}"`
+const formatNested = (...words) => (
+  words
+    .reduce(word => `"${word}"`, [])
+    .join('.')
+)
+
+/**
+ * 
+ * @param {page, perPage} param0 
+ * @return {page, perPage, offset}
+ */
+export const pageOptions = ({ page = 1, perPage = 12 }) => {
+  const obj = {
+    page: isNaN(page) ? 1 : Number.parseInt(page <= 0 ? 1 : page),
+    perPage: isNaN(perPage) ? 12 : Number.parseInt(perPage <= 0 ? 1 : perPage)
+  }
+
+  obj.offset = (obj.page - 1) * perPage
+  return obj
+}
+
+export const likeness = (a, b) => {
+  const arr = new Set(b)
+  return a.filter((el) => arr.has(el))
+}
+
+export const diff = (a, b) => {
+  const arr = new Set(b)
+  return a.filter((el) => arr.has(el))
+}
+
+export const include = function (table, fields, nestedName = null) {
+  return !fields || fields === '*'
+    ? this.map(formatNested)
+    : [].concat(fields).reduce((arr, field) => {
+      if (this.includes(field)) {
+        const fieldName = `"${table}"."${field}"` +
+        nestedName 
+          ? ` as "${nestedName.toLowerCase()}.${field}"`
           : ''
-        )
-      )
-    }
-    return arr
-  }, [])
+        arr.push(fieldName)
+      }
+      return arr
+    }, [])
 }
 
 // Exclude fields 
-const exclude = function (fields, nestedName = null) {
+export const exclude = function (table, _fields, nestedName = false) {
+  const fields = [].concat(_fields)
   return this.reduce((arr, field) => {
     if (!fields.includes(field)) {
-      arr.push(`"${nestedName}"."${field}" ` + (
+      const fieldName = `"${table}"."${field}"` + (
         nestedName
-          ?  `as "${nestedName.toLowerCase()}.${field}"`
+          ? ` as "${nestedName.toLowerCase()}.${field}"`
           : ''
-        )
       )
+      arr.push(fieldName)
     }
     return arr
   }, [])
 }
 
-const formatFields = (data) => {
+export const formatFields = (data) => {
   return !data.includes('(') 
     ? data.split(',')
     : data.split(',').reduce(
@@ -51,7 +84,7 @@ const formatFields = (data) => {
     )
 }
 
-const formatAllowedOptions = ({
+export const formatAllowedOptions = ({
   _sort = '',
   _limit = 0,
   _offset = 0,
@@ -206,7 +239,7 @@ const formatOptions = ({
 }
 */
 
-const getProperties = (data, props) => (
+export const getProperties = (data, props) => (
   [].concat(props).reduce((obj, prop) => {
     obj[prop] = data[prop]
     return obj
@@ -224,7 +257,7 @@ const slugify = (text) => {
     .replace(/-+$/, '') // Trim - from end of text
 }
 
-const knexMethod = (query, option, options = {}) => {
+export const knexMethod = (query, option, options = {}) => {
   if (options[option] === null || options[option] === undefined) {
     return query
   }
@@ -239,5 +272,3 @@ const knexMethod = (query, option, options = {}) => {
     query
   )
 }
-
-export { knexMethod, getProperties, formatFields, formatAllowedOptions, slugify }

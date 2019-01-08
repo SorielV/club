@@ -109,6 +109,23 @@ CREATE VIEW "VBlog" as (
     "Blog"."idUser",
     "Blog"."title",
     "Blog"."slug",
+    "Blog"."content",
+    "Blog"."visibility",
+    "UserProfile"."username",
+    "UserProfile"."profileImage",
+    "UserProfile"."firstName",
+    "Blog"."createdAt",
+    "Blog"."updatedAt"
+  from "Blog" inner join "UserProfile" using ("idUser")
+);
+
+CREATE VIEW "VBlogInfo" as (
+  select
+    "Blog"."id",
+    "Blog"."idClub",
+    "Blog"."idUser",
+    "Blog"."title",
+    "Blog"."slug",
     "Blog"."description",
     "Blog"."visibility",
     "UserProfile"."username",
@@ -152,3 +169,29 @@ CREATE TABLE "BlogTopic"(
 );
 
 select * from "VBlog";
+
+select * from "Blog"
+  left join "VBlogTopic" on "VBlogTopic"."idBlog" = "Blog".id
+  left join "VBlogTag" on "VBlogTag"."idBlog" = "Blog".id;
+
+-- Topic
+select * from "Blog"
+  left join "VBlogTopic" on "VBlogTopic"."idBlog" = "Blog".id
+  left join "VBlogTag" on "VBlogTag"."idBlog" = "Blog".id
+  where "Blog".id in (
+    select "BlogTopic"."idBlog" as "id" from "BlogTopic"
+    where "BlogTopic"."idTopic" = 1
+    group by "BlogTopic"."idBlog"
+  )
+;
+
+-- Tag
+select * from "Blog"
+  left join "VBlogTopic" on "VBlogTopic"."idBlog" = "Blog".id
+  left join "VBlogTag" on "VBlogTag"."idBlog" = "Blog".id
+  where "Blog".id in (
+    select "BlogTag"."idBlog" as "id" from "BlogTag"
+    where "BlogTag"."idTag" in (2)
+    group by "BlogTag"."idBlog"
+  )
+;
