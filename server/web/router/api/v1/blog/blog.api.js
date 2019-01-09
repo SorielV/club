@@ -5,10 +5,10 @@ import { ErrorHandle, HandleAuth, isAuth, isAdmin } from './../../../../middlewa
 const router = Router()
 
 router
-  .get('/', ErrorHandle(Controller.getBlogs))
+  .get('/', ErrorHandle(Controller.getBlog))
   .get('/:id', ErrorHandle(Controller.getBlog))
   //.use(HandleAuth, isAuth)
-  .post('/', ErrorHandle(Controller.createBlog))
+  .post('/', ErrorHandle(Controller.create))
   .put('/:id', ErrorHandle(Controller.updateBlog))
   .delete('/:id', ErrorHandle(Controller.deleteBlog))
 

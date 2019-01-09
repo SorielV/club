@@ -2,6 +2,7 @@ import Schemata from './../../utils/Schema'
 
 export const Model = {
   table: 'Blog',
+  primaryKey: ['id'],
   fields: {
     id: {
       type:Number,
@@ -53,6 +54,9 @@ export const Model = {
       type: Date,
       required: false
     }
+  },
+  options: {
+    debug: true
   }
 }
 

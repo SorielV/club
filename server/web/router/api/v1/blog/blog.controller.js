@@ -131,12 +131,12 @@ const getTagsQuery = (idBlog) => {
   `
 }
 
-const getBlogInfoQuery = () => {
-  const { ...options } = formatAllowedOptions(
+const getBlogInfoQuery = (_options) => {
+  const options = formatAllowedOptions(
     _options,
     {
       table: VClub.table,
-      allowed: VClubInfo.allowedFilter
+      allowed: VClub.allowedFilter
     }
   )
 
@@ -162,7 +162,7 @@ const getBlogCompleteQuery = () => {
     ${[
       ...exclude.apply(Blog.fieldsName, [Blog.table, 'content']), 
       ...exclude.apply(Object.keys(VBlogTag.fields), [VBlogTag.table, 'idBlog', 'tag']),
-      ...exclude.apply(Object.keys(VBlogTopic.fields), [VBlogTopic.table, 'idBlog', 'tag'])
+      ...exclude.apply(Object.keys(VBlogTopic.fields), [VBlogTopic.table, 'idBlog', 'topic'])
       ].join(',')
     }
     from "${Blog.table}"
@@ -243,14 +243,25 @@ const API = {
         idClub = null, // !
         ...options
       },
-      member
+      member = true
     } = req
 
     if (!idClub) {
       // TODO: Personal Blogs
+      // const { rows: items } = await (format === 'simple'
       const items = await (format === 'simple'
         ? Blog.query(getBlogInfoQuery({ visibility: Visibility.PUBLIC }))
-        : Blog.query(getBlogCompleteQuery(whereEquals({ visibility: Visibility.PUBLIC }, 'Blog')))
+        : Blog.query(getBlogCompleteQuery() + ' where ' +
+          whereBlogBuilder(Blog.table, { ...options, visibility: Visibility.PUBLIC }, {
+            idUser: '=',
+            idClub: '=',
+            title: '=~',
+            slug: '=~',
+            visibility: '='
+          }).join(' and '),
+          {}
+          // { rowMode: 'array' }
+        )
       )
 
       return res
@@ -292,7 +303,16 @@ const API = {
     }
 
     const baseStatement = getBlogCompleteQuery()
-    const whereStatement = []
+
+    // TODO: EXPLAIN ANALYSE [Performance where order]
+    const whereStatement = [
+      whereBlogBuilder(Blog.table, { ...options, idClub }, {
+        idUser: '=',
+        idClub: '=',
+        title: '=~',
+        slug: '=~'
+      }).join(' and ')
+    ]
 
     if (!isNullOrUndefined(tag)) {
       whereStatement.push(whereTag(tag))
@@ -300,15 +320,6 @@ const API = {
       whereStatement.push(whereTopic(topic))
     }
 
-    whereStatement.push(
-      whereBlogBuilder(Blog.table, options || {}, {
-        idUser: '=',
-        idClub: '=',
-        title: '=~',
-        slug: '=~'
-      }).join(' and ')
-    )
-  
     const { limit, offset, pagination } = pageOptions(options || {})
     const paginationStatement = `limit ${limit} offset ${offset}` // order by, etc
   
@@ -319,10 +330,20 @@ const API = {
     )
   },
   getTag: async (req, res, next) => {
-
+    const { idClub }  = req.query
+    const items = await Blog.query(getTagsQuery(idClub))
+    return res
+      .status(200)
+      .json({ data: item })
+      .end()
   },
   getTopic: async (req, res, next) => {
-
+    const { idClub }  = req.query
+    const items = await Blog.query(getTopicQuery(idClub))
+    return res
+      .status(200)
+      .json({ data: item })
+      .end()
   },
   // Blog update
   update: async (req, res, next) => {
@@ -330,11 +351,14 @@ const API = {
   } 
 }
 
+export default API
+
 /*console.log(getBlogCompleteQuery())
 console.log(whereTag([1, 2]))
 console.log(whereTopic([1, 2]))
 */
 
+/*
 const x= function() {
   console.time('x')
   const query = knex.select([
@@ -349,7 +373,6 @@ const x= function() {
   return query
 }
 
-/*
 const f = () => {
   const baseStatement = getBlogCompleteQuery()
   const whereStatement = []
@@ -361,11 +384,6 @@ const f = () => {
     'title~': 'JS'
   }
 
-  if (!isNullOrUndefined(tag)) {
-    whereStatement.push(whereTag(tag))
-  } else if (!isNullOrUndefined(topic)) {
-    whereStatement.push(whereTopic(topic))
-  }
   whereStatement.push(
     whereBlogBuilder(Blog.table, options || {}, {
       idUser: '=',
@@ -374,6 +392,13 @@ const f = () => {
       slug: '=~'
     }).join(' and ')
   )
+
+  if (!isNullOrUndefined(tag)) {
+    whereStatement.push(whereTag(tag))
+  } else if (!isNullOrUndefined(topic)) {
+    whereStatement.push(whereTopic(topic))
+  }
+  
 
   const { limit, offset, pagination } = pageOptions(options || {})
   const paginationStatement = `limit ${limit} offset ${offset}` // order by, etc
