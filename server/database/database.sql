@@ -195,3 +195,17 @@ select * from "Blog"
     group by "BlogTag"."idBlog"
   )
 ;
+
+select
+    "Blog"."id","Blog"."idClub","Blog"."idUser","Blog"."title","Blog"."slug","Blog"."description","Blog"."visibility","Blog"."createdAt","Blog"."updatedAt","VBlogTag"."id" as "tag.id","VBlogTag"."tag" as "tag.tag","VBlogTag"."slug" as "tag.slug","VBlogTopic"."id" as "tag.id","VBlogTopic"."topic" as "tag.topic","VBlogTopic"."slug" as "tag.slug"
+    from "Blog"
+      left join "VBlogTopic" on "VBlogTopic"."idBlog" = "Blog".id
+      left join "VBlogTag" on "VBlogTag"."idBlog" = "Blog".id
+   where
+    "Blog"."id" in (
+      select "BlogTag"."idBlog" as "id" from "BlogTag"
+        where "BlogTag"."idTag" in (1)
+      group by "BlogTag"."idBlog"
+    )
+   and "Blog"."idClub" = 1 and "Blog"."idUser" = 1 limit 12 offset 0
+

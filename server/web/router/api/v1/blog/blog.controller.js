@@ -4,6 +4,7 @@ const knex = Knex({ client: 'pg' })
 import { Blog, BlogTag, BlogTopic } from './../../../../../models/blog'
 import { likeness, include, exclude, formatAllowedOptions, knexMethod, pageOptions, whereOptions } from './../../../../../utils/format'
 import Tag from '../../../../../models/blog/tag';
+import { isNullOrUndefined } from 'util';
 
 const whereEquals = (obj, table) => obj.keys(obj).reduce(prop => `"${table}"."${prop}" = '${obj[prop]}'`)
 
@@ -11,6 +12,53 @@ const Visibility = {
   PUBLIC: 0,
   PRIVATE: 1,
   UNPUBLISHED: 2,
+}
+
+const whereBlogBuilder = (table, where, allowed = []) => {
+  const isAllOperatorsAllowed =
+    isNullOrUndefined(allowed) || Array.isArray(allowed)
+
+  console.log(where)
+
+  return Object.keys(where).reduce(
+    (obj, prop) => {
+      const simbol = prop[prop.length - 1]
+      const hasOperator = !Boolean(simbol.match(/[\w\d]/))
+
+      const field = hasOperator
+        ? prop.substring(0, prop.length - 1)
+        : prop
+
+      if (isNullOrUndefined(allowed)) {
+        return obj
+      } else {
+        if (Array.isArray(allowed)) {
+          if (!allowed.includes(field)) return obj
+        } else {
+          if (!allowed.hasOwnProperty(field)) return obj
+        }
+      }
+
+      if (!isAllOperatorsAllowed & !allowed[field].includes(hasOperator ? simbol : '=')) {
+        return obj
+      }
+
+      const propFormatted = typeof where[prop] === 'string'
+        ? "'" + where[prop].replace(/'/g, "''") + "'"
+        : where[prop]
+
+      if (!hasOperator) {
+        obj.push(`"${table}"."${field}" = ${propFormatted}`)
+      } else if (simbol.match(/[<>]/)) {
+        obj.push(`"${table}"."${field} ${simbol} ${where[prop]}`)
+      } else if (simbol.match(/[!~]/)) {
+        obj.push(`"${table}"."${field}" ${(simbol === '!' ? '!=' : 'like ')} ${propFormatted}`)
+      }
+
+      return obj
+    },
+    []
+  )
 }
 
 // Busquedas solo por idTag, idTopic, slug, title, 
@@ -236,19 +284,39 @@ const API = {
       ['idClub', 'idBlog'] ['idUser', 'title', 'slug', ['tag', 'topic']] 'complete'
 
     */
-
-    const pagination = pageOptions(options)
-    const whereoptions = whereOptions(option, [''])
-
-    const query = [getBlogCompleteQuery(), 'where']
-
-    if (tag) {
-
-    } else if (topic) {
-
-    } else {
-
+    if (format !== 'complete') {
+      // TODO: simple format
+      return res
+        .status(404)
+        .end()
     }
+
+    const baseStatement = getBlogCompleteQuery()
+    const whereStatement = []
+
+    if (!isNullOrUndefined(tag)) {
+      whereStatement.push(whereTag(tag))
+    } else if (!isNullOrUndefined(topic)) {
+      whereStatement.push(whereTopic(topic))
+    }
+
+    whereStatement.push(
+      whereBlogBuilder(Blog.table, options || {}, {
+        idUser: '=',
+        idClub: '=',
+        title: '=~',
+        slug: '=~'
+      }).join(' and ')
+    )
+  
+    const { limit, offset, pagination } = pageOptions(options || {})
+    const paginationStatement = `limit ${limit} offset ${offset}` // order by, etc
+  
+    // ES6 => concat (+=) is better (more faster) that join ([])
+    console.log(baseStatement + ' where ' + 
+      whereStatement.join(' and ') + ' ' +
+      paginationStatement
+    )
   },
   getTag: async (req, res, next) => {
 
@@ -281,9 +349,41 @@ const x= function() {
   return query
 }
 
-const y = function() {
-  console.time('y')
-  const query = getBlogCompleteQuery()
-  console.timeEnd('y')
-  return query
+/*
+const f = () => {
+  const baseStatement = getBlogCompleteQuery()
+  const whereStatement = []
+
+  const { tag, topic, ...options } = {
+    tag: 1,
+    topic: null,
+    idClub: 1,
+    'title~': 'JS'
+  }
+
+  if (!isNullOrUndefined(tag)) {
+    whereStatement.push(whereTag(tag))
+  } else if (!isNullOrUndefined(topic)) {
+    whereStatement.push(whereTopic(topic))
+  }
+  whereStatement.push(
+    whereBlogBuilder(Blog.table, options || {}, {
+      idUser: '=',
+      idClub: '=',
+      title: '=~',
+      slug: '=~'
+    }).join(' and ')
+  )
+
+  const { limit, offset, pagination } = pageOptions(options || {})
+  const paginationStatement = `limit ${limit} offset ${offset}` // order by, etc
+
+  // ES6 => concat (+=) is better (more faster) that join ([])
+  console.log(baseStatement + ' where ' + 
+    whereStatement.join(' and ') + ' ' +
+    paginationStatement
+  )
 }
+
+f()
+*/

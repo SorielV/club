@@ -11,12 +11,16 @@ const formatNested = (...words) => (
  * @return {page, perPage, offset}
  */
 export const pageOptions = ({ page = 1, perPage = 12 }) => {
+  // Page (perPage * limit), perPage (limit)
   const obj = {
     page: isNaN(page) ? 1 : Number.parseInt(page <= 0 ? 1 : page),
-    perPage: isNaN(perPage) ? 12 : Number.parseInt(perPage <= 0 ? 1 : perPage)
+    perPage: isNaN(perPage) ? 12 : Number.parseInt(perPage <= 0 ? 1 : perPage),
+    limit: 12,
+    offet: 0
   }
 
   obj.offset = (obj.page - 1) * perPage
+  obj.limit = obj.perPage
   return obj
 }
 
