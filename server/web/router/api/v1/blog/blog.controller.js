@@ -2,7 +2,18 @@ import Knex from 'knex'
 const knex = Knex({ client: 'pg' })
 
 import { Blog, BlogTag, BlogTopic } from './../../../../../models/blog'
-import { likeness, include, exclude, formatAllowedOptions, knexMethod, pageOptions, whereOptions } from './../../../../../utils/format'
+import { 
+  likeness,
+  include,
+  exclude,
+  formatAllowedOptions,
+  knexMethod,
+  pageOptions,
+  whereOptions,
+  castObjectfromCollectionWithIndex,
+  castObjectfromArraywithIndex,
+  groupBy
+} from './../../../../../utils/format'
 import Tag from '../../../../../models/blog/tag';
 import { isNullOrUndefined } from 'util';
 
@@ -12,6 +23,23 @@ const Visibility = {
   PUBLIC: 0,
   PRIVATE: 1,
   UNPUBLISHED: 2,
+}
+
+
+const processRow = ({ rows, fields }, index) => {
+  return castObjectfromCollectionWithIndex(
+    rows,
+    fields.map(({ name }) => name),
+    index
+  )
+}
+
+const processRows = ({ rows, fields }, index) => {
+  return castObjectfromCollectionWithIndex(
+    groupBy(rows, ([id]) => id),
+    fields.map(({ name }) => name),
+    index
+  )
 }
 
 const whereBlogBuilder = (table, where, allowed = []) => {
@@ -157,10 +185,10 @@ const getBlogInfoQuery = (_options) => {
     left join "VBlogTopic" on "VBlogTopic"."idBlog" = "Blog".id
     left join "VBlogTag" on "VBlogTag"."idBlog" = "Blog".id
  */
-const getBlogCompleteQuery = () => {
+const getBlogCompleteQuery = (blogExclude = 'content') => {
   const query = `select 
     ${[
-      ...exclude.apply(Blog.fieldsName, [Blog.table, 'content']), 
+      ...exclude.apply(Blog.fieldsName, [Blog.table, [].concat(blogExclude || [])]), 
       ...exclude.apply(Object.keys(VBlogTag.fields), [VBlogTag.table, 'idBlog', 'tag']),
       ...exclude.apply(Object.keys(VBlogTopic.fields), [VBlogTopic.table, 'idBlog', 'topic'])
       ].join(',')
@@ -249,9 +277,10 @@ const API = {
     if (!idClub) {
       // TODO: Personal Blogs
       // const { rows: items } = await (format === 'simple'
-      const items = await (format === 'simple'
-        ? Blog.query(getBlogInfoQuery({ visibility: Visibility.PUBLIC }))
-        : Blog.query(getBlogCompleteQuery() + ' where ' +
+      let items
+      if (format === 'info' || format === 'blog') {
+        const data = await Blog.query(
+          getBlogCompleteQuery(format === 'info' ? 'content' : 'description') + ' where ' +
           whereBlogBuilder(Blog.table, { ...options, visibility: Visibility.PUBLIC }, {
             idUser: '=',
             idClub: '=',
@@ -259,10 +288,20 @@ const API = {
             slug: '=~',
             visibility: '='
           }).join(' and '),
-          {}
-          // { rowMode: 'array' }
+          { rowMode: 'array' }
         )
-      )
+        items = processRows(data, [0, 8, 11, 14])
+      } else if(format === 'simple') {
+        const { rows } = await Blog.query(
+          getBlogInfoQuery({ visibility: Visibility.PUBLIC })
+        )
+        items = rows
+      } else {
+        return res
+        .status(401)
+        .json({ message: 'Formato no valido' })
+        .end()  
+      }
 
       return res
         .status(200)

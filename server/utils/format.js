@@ -1,9 +1,36 @@
+import { isNullOrUndefined } from "util";
+
 // Include fields
 const formatNested = (...words) => (
   words
     .reduce(word => `"${word}"`, [])
     .join('.')
 )
+
+export const mergeObjectWithReference = (object, target) => {
+  for (const key in object) {
+    target[key] = object[key]
+  }
+}
+
+export const groupBy = (arr, fn) => {
+  let currentId = arr[0][0]
+  let pos = 0
+  return arr
+    .map(typeof fn === 'function' ? fn : val => val[fn])
+    .reduce((acc, val, i) => {
+      if (arr[i][0] === currentId) {
+        acc[pos] = acc[pos] || []
+        acc[pos].push(arr[i])
+      } else {
+        acc[++pos] = acc[pos] || []
+        acc[pos].push(arr[i])
+        currentId = arr[i][0]
+      }
+
+      return acc
+    }, [])
+}
 
 /**
  * 
@@ -180,6 +207,182 @@ export const formatAllowedOptions = ({
   return result
 }
 
+export const createObjectFromArray = (values, keys) =>
+  keys.reduce((acc, key, i) => {
+    acc[key] = values[i]
+    return acc
+  }, {});
+
+export const mergeObject = (target, { ...object })  => {
+  for (let prop in object) {
+    if (object.hasOwnProperty(prop)) {
+      target[prop] = object[prop]
+    }
+  }
+  return target
+}
+
+// TODO: A best way of clone object
+export const cloneObject = (object) => JSON.parse(JSON.stringify(object))
+
+/**
+ * 
+ * @param {array}  
+ * @param {*} properties
+ * @param {*} index 
+ */
+export const castObjectfromArraywithIndex = ([...samples], [...props], index) => {
+  console.time('castObjectfromArraywithIndex')
+  const template = {}
+  let startIndex = 0
+
+  if (index[0] === 0) {
+    Object.assign(template, createObjectFromArray(samples[0], props.slice(0, index[1] + 1)))
+    startIndex = 1
+  }
+
+  // Utils Generales 
+  const keysOfArrayProperties = index
+    .slice(startIndex, index.length - 1)
+    .map(index => props[index + 1].split(".")[0])
+
+  const properties = props.map(prop => {
+    if (prop.includes(".")) {
+      const [, key] = prop.split(".")
+      return key
+    }
+    return prop
+  })
+
+  const arrayProperties = keysOfArrayProperties.reduce((obj, key) => {
+    obj[key] = []
+    return obj
+  }, {})
+
+  const arrLimits = keysOfArrayProperties.map((v, i) => (
+    [index[startIndex + i] + 1, index[startIndex + i + 1] + 1])
+  )
+  const arrProps = arrLimits.map(limit => (properties.slice(...limit)))
+
+  Object.assign(template, cloneObject(arrayProperties))
+  const keys = cloneObject(arrayProperties)
+
+  for (let i = 0; i < samples.length; i++) {
+    const sample = samples[i]
+    keysOfArrayProperties.map((key, i) => {
+      const idKey = sample[arrLimits[i][0]]
+      if (!isNullOrUndefined(idKey)) {
+        if (!keys[key].includes(idKey)) {
+          keys[key].push(idKey)
+          template[key].push(
+            createObjectFromArray(sample.slice(...arrLimits[i]), arrProps[i])
+          )
+        }
+      }
+    })
+  }
+
+  console.timeEnd('castObjectfromArraywithIndex')
+  return template
+}
+
+export const castObjectfromCollectionWithIndex = ([...collection], [...props], index) => {
+  console.time('castObjectfromCollectionWithIndex')
+  
+  const template = {}
+  let startIndex = 0
+
+  if (index[0] === 0) {
+    Object.assign(template, createObjectFromArray(new Array(index[1] + 1).fill(null), props.slice(0, index[1] + 1)))
+    startIndex = 1
+  }
+
+  // Utils Generales 
+  const keysOfArrayProperties = index
+    .slice(startIndex, index.length - 1)
+    .map(index => props[index + 1].split(".")[0])
+
+  const properties = props.map(prop => {
+    if (prop.includes(".")) {
+      const [, key] = prop.split(".")
+      return key
+    }
+    return prop
+  })
+
+  const arrayProperties = keysOfArrayProperties.reduce((obj, key) => {
+    obj[key] = []
+    return obj
+  }, {})
+
+  const arrLimits = keysOfArrayProperties.map((v, i) => (
+    [index[startIndex + i] + 1, index[startIndex + i + 1] + 1])
+  )
+  const arrProps = arrLimits.map(limit => (properties.slice(...limit)))
+  Object.assign(template, cloneObject(arrayProperties))
+
+  const items = collection.map(([...samples]) => {
+    const item = cloneObject(template)
+    mergeObjectWithReference(createObjectFromArray(samples[0], props.slice(0, index[1] + 1)), item)
+
+    const keys = cloneObject(arrayProperties)
+
+    for (let i = 0; i < samples.length; i++) {
+      const sample = samples[i]
+      keysOfArrayProperties.forEach((key, i) => {
+        const idKey = sample[arrLimits[i][0]]
+        if (!isNullOrUndefined(idKey)) {
+          if (!keys[key].includes(idKey)) {
+            keys[key].push(idKey)
+            item[key].push(
+              createObjectFromArray(sample.slice(...arrLimits[i]), arrProps[i])
+            )
+          }
+        }
+      })
+    }
+    return item
+  })
+
+  console.timeEnd('castObjectfromCollectionWithIndex')
+  console.log(items)
+  return items
+}
+
+export const getProperties = (data, props) => (
+  [].concat(props).reduce((obj, prop) => {
+    obj[prop] = data[prop]
+    return obj
+  } , {})
+)
+
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+    .replace(/^-+/, '') // Trim - from start of text
+    .replace(/-+$/, '') // Trim - from end of text
+}
+
+export const knexMethod = (query, option, options = {}) => {
+  if (options[option] === null || options[option] === undefined) {
+    return query
+  }
+
+  if (!Array.isArray(options[option])) {
+    // Should be array of array
+    return query[option](options[option])
+  }
+
+  return options[option].reduce(
+    (query, value) => query[option](...value),
+    query
+  )
+}
+
 /*
 const formatOptions = ({
   _sort,
@@ -242,37 +445,3 @@ const formatOptions = ({
   }
 }
 */
-
-export const getProperties = (data, props) => (
-  [].concat(props).reduce((obj, prop) => {
-    obj[prop] = data[prop]
-    return obj
-  } , {})
-)
-
-const slugify = (text) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
-    .replace(/\-\-+/g, '-') // Replace multiple - with single -
-    .replace(/^-+/, '') // Trim - from start of text
-    .replace(/-+$/, '') // Trim - from end of text
-}
-
-export const knexMethod = (query, option, options = {}) => {
-  if (options[option] === null || options[option] === undefined) {
-    return query
-  }
-
-  if (!Array.isArray(options[option])) {
-    // Should be array of array
-    return query[option](options[option])
-  }
-
-  return options[option].reduce(
-    (query, value) => query[option](...value),
-    query
-  )
-}
