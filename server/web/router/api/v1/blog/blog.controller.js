@@ -14,6 +14,7 @@ import {
   castObjectfromArraywithIndex,
   groupBy
 } from './../../../../../utils/format'
+
 import Tag from '../../../../../models/blog/tag';
 import { isNullOrUndefined } from 'util';
 
@@ -25,9 +26,13 @@ const Visibility = {
   UNPUBLISHED: 2,
 }
 
-
 const processRow = ({ rows, fields }, index) => {
-  return castObjectfromCollectionWithIndex(
+  if (isNullOrUndefined(rows) || rows.length === 0) {
+    return {}
+  }
+
+  console.log(rows)
+  return castObjectfromArraywithIndex(
     rows,
     fields.map(({ name }) => name),
     index
@@ -35,6 +40,10 @@ const processRow = ({ rows, fields }, index) => {
 }
 
 const processRows = ({ rows, fields }, index) => {
+  if (isNullOrUndefined(rows) || rows.length === 0) {
+    return []
+  }
+
   return castObjectfromCollectionWithIndex(
     groupBy(rows, ([id]) => id),
     fields.map(({ name }) => name),
@@ -45,8 +54,6 @@ const processRows = ({ rows, fields }, index) => {
 const whereBlogBuilder = (table, where, allowed = []) => {
   const isAllOperatorsAllowed =
     isNullOrUndefined(allowed) || Array.isArray(allowed)
-
-  console.log(where)
 
   return Object.keys(where).reduce(
     (obj, prop) => {
@@ -92,8 +99,8 @@ const whereBlogBuilder = (table, where, allowed = []) => {
 // Busquedas solo por idTag, idTopic, slug, title, 
 // Busquedas en sitio solo por keywords
 
-const VClub = {
-  table: 'VClub',
+const VBlog = {
+  table: 'VBlog',
   fields: {
     id: Number,
     idClub: Number,
@@ -159,12 +166,14 @@ const getTagsQuery = (idBlog) => {
   `
 }
 
-const getBlogInfoQuery = (_options) => {
+const getBlogInfoQuery = (_options, allowed) => {
+  console.log(VBlog.allowedFilter.concat(allowed))
+
   const options = formatAllowedOptions(
     _options,
     {
-      table: VClub.table,
-      allowed: VClub.allowedFilter
+      table: VBlog.table,
+      allowed: VBlog.allowedFilter.concat(allowed)
     }
   )
 
@@ -175,16 +184,6 @@ const getBlogInfoQuery = (_options) => {
     .toString()
 }
 
-/**
- // Excepted
- select 
-  "Blog"."id","Blog"."idClub","Blog"."idUser","Blog"."title","Blog"."slug","Blog" ...
-  "VBlogTag"."id" as "tag.id","VBlogTag"."tag" as "tag.tag","VBlogTag"."slug" as "tag.slug",
-  "VBlogTopic"."id" as "tag.id","VBlogTopic"."topic" as "tag.topic","VBlogTopic"."slug" as "tag.slug"
-  from Blog
-    left join "VBlogTopic" on "VBlogTopic"."idBlog" = "Blog".id
-    left join "VBlogTag" on "VBlogTag"."idBlog" = "Blog".id
- */
 const getBlogCompleteQuery = (blogExclude = 'content') => {
   const query = `select 
     ${[
@@ -223,7 +222,7 @@ const whereTopic = (topics) => {
   return query
 }
 
-const API = {
+export const APIBlog = {
   create: async (req, res, next) => {
     const { id: idUser } = req.user
     const { tags , topics, ...blog } = req.body
@@ -271,13 +270,51 @@ const API = {
         idClub = null, // !
         ...options
       },
-      member = true
+      member = null
     } = req
 
-    if (!idClub) {
+    if (req.params.id) {
+      // Difentes where conditions
+      let item
+      let options = { id: Number.parseInt(req.params.id) }
+
+      if (isNullOrUndefined(member)) 
+        options.visibility = Visibility.PUBLIC // Solo blogs publicos
+      else
+        options.idClub = Number.parseInt(idClub) // Cualquier blos
+
+      if (['info', 'blog'].includes(format)) {
+        const data = await Blog.query(
+          getBlogCompleteQuery(format === 'info' ? 'content' : 'description') + ' where ' +
+            whereBlogBuilder(Blog.table, options, {
+              id: '=',
+              idClub: '=',
+              visibility: '='
+            })
+            .join(' and '),
+            { rowMode: 'array' }
+        )
+        item = processRow(data, [0, 8, 11, 14])
+      } else if (format === 'simple') {
+        const { rows } = await Blog.query(getBlogInfoQuery(options, ['visibility']))
+        item = rows[0]
+      } else {
+        return res
+        .status(401)
+        .json({ message: 'Formato no valido' })
+        .end()  
+      }
+
+      return res
+        .status(200)
+        .json({ data: item })
+        .end()
+    } else {
       // TODO: Personal Blogs
       // const { rows: items } = await (format === 'simple'
       let items
+      const baseConditions = {}
+
       if (format === 'info' || format === 'blog') {
         const data = await Blog.query(
           getBlogCompleteQuery(format === 'info' ? 'content' : 'description') + ' where ' +
@@ -309,38 +346,7 @@ const API = {
         .end()
     }
 
-    if (req.params.id && member) {
-      const items = await (format === 'simple' 
-        ? Blog.query(
-            getBlogInfoQuery({ id: req.params.id, idClub  })
-          )
-        : Blog.query(
-            getBlogCompleteQuery(
-              whereEquals({ id: req.params.id, idClub }, 'Blog')
-            )
-          )
-      )
-
-      return res
-        .status(200)
-        .json({ data: items })
-        .end()
-    }
-
-    // Opciones permitidas 
-    /**
-      page, perPage, [offset, limit]
-      ['idClub', 'idBlog'] ['idUser', 'title', 'slug'] 'simple'
-      ['idClub', 'idBlog'] ['idUser', 'title', 'slug', ['tag', 'topic']] 'complete'
-
-    */
-    if (format !== 'complete') {
-      // TODO: simple format
-      return res
-        .status(404)
-        .end()
-    }
-
+    /*
     const baseStatement = getBlogCompleteQuery()
 
     // TODO: EXPLAIN ANALYSE [Performance where order]
@@ -367,6 +373,7 @@ const API = {
       whereStatement.join(' and ') + ' ' +
       paginationStatement
     )
+    */
   },
   getTag: async (req, res, next) => {
     const { idClub }  = req.query
@@ -390,7 +397,7 @@ const API = {
   } 
 }
 
-export default API
+export default APIBlog
 
 /*console.log(getBlogCompleteQuery())
 console.log(whereTag([1, 2]))
@@ -450,4 +457,13 @@ const f = () => {
 }
 
 f()
+
+// Excepted
+select 
+"Blog"."id","Blog"."idClub","Blog"."idUser","Blog"."title","Blog"."slug","Blog" ...
+"VBlogTag"."id" as "tag.id","VBlogTag"."tag" as "tag.tag","VBlogTag"."slug" as "tag.slug",
+"VBlogTopic"."id" as "tag.id","VBlogTopic"."topic" as "tag.topic","VBlogTopic"."slug" as "tag.slug"
+from Blog
+  left join "VBlogTopic" on "VBlogTopic"."idBlog" = "Blog".id
+  left join "VBlogTag" on "VBlogTag"."idBlog" = "Blog".id
 */

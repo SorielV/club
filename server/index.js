@@ -17,7 +17,6 @@ let config = require('../nuxt.config.js')
 config.dev = !(process.env.NODE_ENV === 'production')
 
 async function start() {
-  /*
   // Init Nuxt.js
   const nuxt = new Nuxt(config)
 
@@ -26,15 +25,11 @@ async function start() {
     const builder = new Builder(nuxt)
     await builder.build()
   }
-  */
 
-  app.get('/v1', (req, res) => {
-    return res.status(200).json(req.query).end()
-  })
   // Give nuxt middleware to express
   app.use('/api/v1/club', ClubAPI)
   app.use('/api/v1/blog', BlogAPI)
-  // app.use(nuxt.render)
+  app.use(nuxt.render)
 
   // Listen the server
   app.listen(port, host)

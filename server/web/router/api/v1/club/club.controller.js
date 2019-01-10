@@ -1,7 +1,7 @@
 import Knex from 'knex'
 const knex = Knex({ client: 'pg' })
 
-import { Club, ClubInfo, ClubMember } from './../../../../../models/club/'
+import { Club, ClubInfo, ClubMember } from './../../../../../models/club'
 import { formatAllowedOptions, knexMethod } from './../../../../../utils/format'
 
 // Vistas
@@ -112,7 +112,7 @@ const API = {
       .end()
   },
   getClub: async (req, res, next) => {
-    const format = req.query.format && req.query.format === 'complete'
+    const format = req.query.format && req.query.format === 'simple'
     const items = await Club.getClub({ id: req.params.id }, format)
     return res
       .status(200)
@@ -120,7 +120,7 @@ const API = {
       .end()
   },
   getClubs: async (req, res, next) => {
-    const format = req.query.format && req.query.format === 'complete'
+    const format = req.query.format && req.query.format === 'simple'
     const items = await Club.getClubs(req.query, format)
     return res
       .status(200)

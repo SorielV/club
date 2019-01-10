@@ -1,33 +1,15 @@
-<template>
-  <section class="section">
-    <div class="columns is-mobile">
-      <div
-        v-for="(feature, i) of features"
-        :key="i"
-        class="column">
-        <div class="card">
-          <header class="card-header">
-            <p class="card-header-title has-text-grey">
-              {{ feature.title }}
-            </p>
-          </header>
-          <div class="card-content">
-            <div class="content has-text-centered">
-              <b-icon
-                :icon="feature.icon"
-                size="is-large"
-                type="is-primary"/>
-            </div>
-          </div>
-          <footer class="card-footer">
-            <div
-              class="card-footer-item"
-              v-html="feature.content"/>
-          </footer>
-        </div>
-      </div>
-    </div>
-  </section>
+<template lang="pug">
+  section.hero.is-medium
+    .hero-body
+      .container
+        h1.title Lorem
+        .content
+          p
+            | Mollit culpa culpa do in est Lorem. Exercitation et aliquip exercitation ea labore in nostrud irure commodo esse reprehenderit proident cupidatat. Eiusmod veniam reprehenderit voluptate ea consectetur excepteur adipisicing deserunt amet cupidatat voluptate eu. Consequat ullamco minim fugiat id ullamco consequat.
+            | Non dolore proident est reprehenderit sit tempor cupidatat reprehenderit nulla do cupidatat. Veniam eiusmod culpa veniam in consectetur. Proident dolor voluptate quis esse consectetur ullamco consequat Lorem. Enim commodo labore qui elit velit qui non irure eu ipsum veniam voluptate officia.
+            | In irure aliquip mollit reprehenderit dolor ex adipisicing laborum do minim. Velit minim culpa exercitation est eu sunt adipisicing excepteur dolor veniam incididunt. Labore labore voluptate adipisicing pariatur eu ut non ad occaecat eu cillum quis nostrud exercitation.
+            | Exercitation eu do cupidatat officia culpa dolore ad exercitation. Pariatur excepteur enim velit Lorem deserunt nostrud nulla voluptate pariatur labore laboris. Et sunt incididunt veniam Lorem nulla. Labore est enim magna velit officia cillum eiusmod non anim adipisicing qui exercitation. Amet pariatur officia in tempor dolor mollit commodo reprehenderit anim minim consectetur do sunt dolor. Qui aliquip laboris id consectetur sit consectetur excepteur aute. Anim et officia exercitation do occaecat ut eu aute esse.
+            | Veniam ea in fugiat nisi veniam nisi tempor sint non. Incididunt eiusmod aute ea labore ea. Amet enim est ipsum nulla labore ullamco nisi consequat laboris cupidatat.
 </template>
 
 <script>
@@ -35,16 +17,9 @@ import BLogo from '@/components/Logo'
 
 export default {
   name: 'HomePage',
-  components: {BLogo},
+  components: {},
   data() {
-      return {
-          features: [
-              { icon: 'github-circle', title: 'Free', content: `<span>Open source on <a href="https://github.com/buefy/buefy"> GitHub</a></span>` },
-              { icon: 'cellphone-link', title: 'Responsive', content: `<span><b class="has-text-grey">Every</b> component is responsive</span>` },
-              { icon: 'alert-decagram', title: 'Modern', content: `<span>Built with <a href="https://vuejs.org/">Vue.js</a> and <a href="http://bulma.io/">Bulma</a></span>` },
-              { icon: 'arrange-bring-to-front', title: 'Lightweight', content: `<span>No other internal dependency</span>` }
-          ]
-      }
+    return {}
   }
 }
 </script>

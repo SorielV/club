@@ -1,6 +1,6 @@
 <template lang="pug">
   .hero-head
-    header.navbar
+    header.navbar.is-link
       .container
         .navbar-brand
           a.navbar-item(href="/")
@@ -11,25 +11,25 @@
             span
         #navbarMenuHeroC.navbar-menu
           .navbar-end
-            a.navbar-item.is-active
+            nuxt-link(to='/').navbar-item
               | Inicio
             nuxt-link(to='/blog').navbar-item
               | Blog
-            a.navbar-item
+            nuxt-link(to='/events').navbar-item
               | Eventos
-            a.navbar-item
+            nuxt-link(to='/calendar').navbar-item
               | Calendario
-            a.navbar-item
+            nuxt-link(to='/about').navbar-item
               | Sobre nosotros
-            a.navbar-item
+            nuxt-link(to='/clubs').navbar-item
               | Clubes
             span.navbar-item
-              a.button.is-info.is-outlined
+              a.button.is-info
                 span.icon
                   i.mdi.mdi-github
                 span Registro
             span.navbar-item
-              a.button.is-danger.is-outlined
+              a.button.is-danger
                 span.icon
                   i.mdi.mdi-github
                 span Login
