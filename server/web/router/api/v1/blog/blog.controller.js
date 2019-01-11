@@ -1,9 +1,12 @@
 import Knex from 'knex'
-const knex = Knex({ client: 'pg' })
 
-import { Blog, BlogTag, BlogTopic } from './../../../../../models/blog'
 import { 
-  likeness,
+  Blog,
+  BlogTag,
+  BlogTopic
+} from './../../../../../models/blog'
+
+import { 
   include,
   exclude,
   formatAllowedOptions,
@@ -18,6 +21,7 @@ import {
 import Tag from '../../../../../models/blog/tag';
 import { isNullOrUndefined } from 'util';
 
+const knex = Knex({ client: 'pg' })
 const whereEquals = (obj, table) => obj.keys(obj).reduce(prop => `"${table}"."${prop}" = '${obj[prop]}'`)
 
 const Visibility = {
@@ -98,7 +102,6 @@ const whereBlogBuilder = (table, where, allowed = []) => {
 
 // Busquedas solo por idTag, idTopic, slug, title, 
 // Busquedas en sitio solo por keywords
-
 const VBlog = {
   table: 'VBlog',
   fields: {
@@ -199,7 +202,6 @@ const getBlogCompleteQuery = (blogExclude = 'content') => {
   return query
 }
 
-
 const whereTag = (tags) => {
   const query = `
     "${Blog.table}"."id" in (
@@ -222,7 +224,7 @@ const whereTopic = (topics) => {
   return query
 }
 
-export const APIBlog = {
+export const BlogAPI = {
   create: async (req, res, next) => {
     const { id: idUser } = req.user
     const { tags , topics, ...blog } = req.body
@@ -397,13 +399,6 @@ export const APIBlog = {
   } 
 }
 
-export default APIBlog
-
-/*console.log(getBlogCompleteQuery())
-console.log(whereTag([1, 2]))
-console.log(whereTopic([1, 2]))
-*/
-
 /*
 const x= function() {
   console.time('x')
@@ -418,52 +413,6 @@ const x= function() {
   .toString()
   return query
 }
-
-const f = () => {
-  const baseStatement = getBlogCompleteQuery()
-  const whereStatement = []
-
-  const { tag, topic, ...options } = {
-    tag: 1,
-    topic: null,
-    idClub: 1,
-    'title~': 'JS'
-  }
-
-  whereStatement.push(
-    whereBlogBuilder(Blog.table, options || {}, {
-      idUser: '=',
-      idClub: '=',
-      title: '=~',
-      slug: '=~'
-    }).join(' and ')
-  )
-
-  if (!isNullOrUndefined(tag)) {
-    whereStatement.push(whereTag(tag))
-  } else if (!isNullOrUndefined(topic)) {
-    whereStatement.push(whereTopic(topic))
-  }
-  
-
-  const { limit, offset, pagination } = pageOptions(options || {})
-  const paginationStatement = `limit ${limit} offset ${offset}` // order by, etc
-
-  // ES6 => concat (+=) is better (more faster) that join ([])
-  console.log(baseStatement + ' where ' + 
-    whereStatement.join(' and ') + ' ' +
-    paginationStatement
-  )
-}
-
-f()
-
-// Excepted
-select 
-"Blog"."id","Blog"."idClub","Blog"."idUser","Blog"."title","Blog"."slug","Blog" ...
-"VBlogTag"."id" as "tag.id","VBlogTag"."tag" as "tag.tag","VBlogTag"."slug" as "tag.slug",
-"VBlogTopic"."id" as "tag.id","VBlogTopic"."topic" as "tag.topic","VBlogTopic"."slug" as "tag.slug"
-from Blog
-  left join "VBlogTopic" on "VBlogTopic"."idBlog" = "Blog".id
-  left join "VBlogTag" on "VBlogTag"."idBlog" = "Blog".id
 */
+
+export default BlogAPI

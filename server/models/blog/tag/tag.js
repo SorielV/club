@@ -19,6 +19,9 @@ export const Model = {
       required: false,
       default: 'true'
     }
+  },
+  options: {
+    debug: true
   }
 }
 

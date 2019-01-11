@@ -1,3 +1,3 @@
-import TagAPI from './tag.controller'
+import TagAPI from './tag.api'
 
 export default TagAPI
