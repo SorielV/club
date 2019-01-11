@@ -3,8 +3,9 @@
 import express from 'express'
 import consola from 'consola'
 import { Nuxt, Builder } from 'nuxt'
-import ClubAPI from './web/router/api/v1/club/club.api'
-import BlogAPI from './web/router/api/v1/blog/blog.api'
+import { ClubAPI } from './web/router/api/v1/club'
+import { BlogAPI } from './web/router/api/v1/blog'
+import { CalendarAPI, EventAPI  } from './web/router/api/v1/calendar'
 
 const app = express()
 const host = process.env.HOST || '127.0.0.1'
@@ -29,6 +30,8 @@ async function start() {
   // Give nuxt middleware to express
   app.use('/api/v1/club', ClubAPI)
   app.use('/api/v1/blog', BlogAPI)
+  app.use('/api/v1/calendar', CalendarAPI)
+  app.use('/api/v1/event', EventAPI)
   app.use(nuxt.render)
 
   // Listen the server

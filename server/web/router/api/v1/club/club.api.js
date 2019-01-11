@@ -12,8 +12,6 @@ router
   .put('/:id', ErrorHandle(Controller.updateClub))
   .delete('/:id', ErrorHandle(Controller.deleteClub))
 
-export default router
-
 /*const isAuthorizedMember = async(req, res, next) => {
   if (!req.user) {
     return res
@@ -35,3 +33,5 @@ export default router
   } else if (member && )
   return next()
 }*/
+
+export default router

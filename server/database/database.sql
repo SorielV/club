@@ -222,3 +222,29 @@ EXPLAIN ANALYSE select
       group by "BlogTag"."idBlog"
     )
    limit 12 offset 0;
+
+
+CREATE TABLE "Calendar"(
+  "id" serial unique not null primary key,
+  "idClub" integer references "Club"(id),
+  "createdAt" date default current_timestamp
+);
+
+drop table "Event";
+
+CREATE TABLE "Event"(
+  "id" serial unique not null primary key,
+  "calendarId" integer references "Club"(id),
+  "idUser" integer unique references "User"(id),
+  "title" varchar(20) not null,
+  "body" varchar(150) null,
+  "category" varchar(10) null,
+  "location" varchar(100) null,
+  "start" timestamp not null,
+  "end" timestamp not null check ("end" >= "start"),
+  "color" varchar(7) null,
+  "bgColor" varchar(7) null,
+  "visibility" smallint default 1,
+  "createdAt" date default current_timestamp,
+  "updatedAt" date null
+)

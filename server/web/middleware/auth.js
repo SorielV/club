@@ -79,3 +79,24 @@ export const isAdmin = async (req, res, next) => {
     }
   }
 }
+
+// TODO: Guardar [idClub, rol] acorde a los clubes de usuario
+// FIX: query { idClub } 
+export const isMember = async (req, res, next) => {
+  const { idClub } = req.query
+  if (req.user &&  req.user.clubs.includes(idClub)) {
+    return next()
+  } else {
+    if (req.error) {
+      return res
+        .status(403)
+        .json({ message: req.error })
+        .end()
+    } else {
+      return res
+        .status(403)
+        .json({ message: 'No eres miembro C:' })
+        .end()
+    }
+  }
+}
