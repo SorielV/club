@@ -103,7 +103,7 @@ Club.getClubs = async function(options, short = true) {
 const API = {
   createClub: async (req, res, next) => {
     const { id: idUser } = req.user
-    const item = await new Club(req.body, idUser).save()
+    const item = await new Club({ ...req.body, idUser }).save()
     const member = await new ClubMember({ idClub: item.id, idUser }).save()
 
     return res
