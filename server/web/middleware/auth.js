@@ -1,26 +1,11 @@
-import jwt from 'jsonwebtoken'
-import jwtConfig from './../../config/jwt.json'
-
-const ADMIN = 1
+import { verify, COOKIE_KEY } from './../../utils/jwt'
 
 // Auth Information
-const authInformation = req => {
-  return new Promise((resolve, reject) => {
-    const header = req.headers.authorization
-
-    if (!header) {
-      return reject(new Error('Token no enviado'))
-    } else if (header.lenght < 30) {
-      return reject(new Error('Token no Valido'))
-    } else {
-      const token = header.substr(7).trim()
-
-      jwt.verify(token, jwtConfig.secret, (error, user) => {
-        if (error) return reject(error)
-        return resolve({ user, token })
-      })
-    }
-  })
+export const authInformation = async (req) => {
+  return await (process.env.AUTH_BASE === 'st'
+    ? getSessionHeader(req)
+    : getSessionCookie(req)
+  )
 }
 
 /** Required Auth **/
@@ -29,14 +14,16 @@ const authInformation = req => {
 export const HandleAuth = async (req, res, next) => {
   try {
     const {
-      user, token
+      data: user,
+      token
     } = await authInformation(req)
 
     req.user = user
-    req.token = token
+    req.token = token    
 
     return next()
   } catch (error) {
+    console.log(error)
     req.error = error.message
     return next()
   }
@@ -58,6 +45,14 @@ export const isAuth = async (req, res, next) => {
         .json({ message: 'No has ingresado' })
         .end()
     }
+  }
+}
+
+export const isNotAuth = async (req, res, next) => {
+  if (req.user) {
+    return res.redirect('/')
+  } else {
+    return next()
   }
 }
 
@@ -99,4 +94,68 @@ export const isMember = async (req, res, next) => {
         .end()
     }
   }
+}
+
+/**
+ * Set request user if the request is signed based in cookies
+ * @param {express: request} req 
+ * @param {express: response} res 
+ * @param {express: next} next
+ */
+export const sessionCookie = async (req, res, next) => {
+  if (req.cookies[COOKIE_KEY]) {
+    req.user = await verify(req.cookies[COOKIE_KEY])
+    req.token = req.cookies[COOKIE_KEY]
+  }
+  return next()
+}
+
+/**
+ * Set request user if the request is signed based in headers
+ * @param {express: request} req 
+ * @param {express: response} res 
+ * @param {express: next} next
+ */
+export const sessionHeader = async (req, res, next) => {
+  if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+    const token = req.headers.authorization.split(' ')[1]
+    req.user = await verify(token)
+    req.token = token
+  }
+  return next()
+}
+
+export const getSessionHeader = async (req) => {
+  if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+    const token = req.headers.authorization.split(' ')[1]
+    return {
+      data: await await verify(token),
+      token
+    }
+  } else {
+    return {}
+  }
+}
+
+export const getSessionCookie = async (req) => {
+  if (req.cookies[COOKIE_KEY]) {
+    const token = req.cookies[COOKIE_KEY]
+
+    return {
+      data: await verify(token),
+      token
+    }
+  } else {
+    return {}
+  }
+}
+
+export const logoutSessionStorageBase = (req, res, next) => {
+  // TODO: LS logout (Client-side implementation)
+  return res.redirect('/')
+}
+
+export const logoutCookieBase = (req, res, next) => { 
+  res.clearCookie(COOKIE_KEY)
+  return res.redirect('/')
 }

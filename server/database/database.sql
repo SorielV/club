@@ -248,3 +248,4 @@ CREATE TABLE "Event"(
   "createdAt" date default current_timestamp,
   "updatedAt" date null
 )
+

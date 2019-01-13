@@ -1,2 +1,5 @@
-export { default as User } from './user'
-export { default as UserInfo } from './user-info'
+import User from './user'
+import UserInfo from './info'
+
+export { User, UserInfo }
+export default User

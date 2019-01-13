@@ -235,8 +235,6 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
       { table: Schema.table, allowed: Schema.fieldsName }
     )
 
-    console.log(options, _options)
-
     const query = Object.keys(options).reduce(
       (query, option) => knexMethod(query, option, options),
       knex
@@ -250,7 +248,11 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     const options = formatAllowedOptions(
       _options, { table: Schema.table }
     )
-    const query = Object.keys(options).reduce(knexMethod, knex)
+
+    const query = Object.keys(options).reduce(
+      (query, option) => knexMethod(query, option, options),
+      knex
+    ).toString()
 
     const { rows } = await Schema.query(query)
     return rows.map(data => new Schema(data, false))
@@ -261,24 +263,9 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     return item || null
   }
 
-  Schema.findOne = async function(_options) {
-    const { 
-      select = '*',
-      where = null,
-      orderBy = null
-    } = formatAllowedOptions(_options)
-
-    const query = ['select', 'from', 'where', 'orderBy'].reduce(
-      knexMethod,
-      knex
-    )
-
-    const { rows: [item] } = await Schema.query(query)
-    return rows || []
-
-    return item 
-      ? Schema(item, false)
-      : null
+  Schema.findOne = async function(where) {
+    const [item] = await Schema.get({ ...where, limit: 1 })
+    return item
   }
 
   Schema.prototype.query = query
