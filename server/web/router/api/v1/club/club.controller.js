@@ -18,6 +18,7 @@ const VClub = {
     createdAt: null
   },
   allowedFilter: {
+    id: null,
     identifier: null,
     idUser: null,
     username: null
@@ -37,6 +38,7 @@ const VClubInfo = {
     createdAt: null
   },
   allowedFilter: {
+    id: null,
     identifier: null,
     idUser: null,
     username: null
@@ -112,8 +114,12 @@ const API = {
       .end()
   },
   getClub: async (req, res, next) => {
+    if (isNaN(req.params.id)) {
+      throw new Error('Formate campo Id no valido')
+    }
+
     const format = req.query.format && req.query.format === 'simple'
-    const items = await Club.getClub({ id: req.params.id }, format)
+    const items = await Club.getClub({ id: Number.parseInt(req.params.id) }, format)
     return res
       .status(200)
       .json({ data: items })

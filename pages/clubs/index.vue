@@ -9,7 +9,7 @@
           button.button.is-link(@click="getClubs('complete')") Complete
       hr
       div(v-for="club in clubs")
-        pre {{ club }}
+        pre(@click="toClub(club)") {{ club }}
         br
 </template>
 
@@ -32,6 +32,9 @@ export default {
     }
   },
   methods: {
+    toClub({ id }) {
+      this.$router.push(`/clubs/${id}`)
+    },
     getClubs(format) {
       this.$axios
         .get('/api/v1/club', { params: { format } }) 

@@ -136,7 +136,7 @@ const VBlogTopic = {
     slug: String
   },
   allowedFilter: [
-    'id',
+    'id'
   ]
 }
 
@@ -280,12 +280,15 @@ export const BlogAPI = {
       let item
       let options = { id: Number.parseInt(req.params.id) }
 
+      if (idClub) {
+        options.idClub = Number.parseInt(idClub)
+      }
+
       if (isNullOrUndefined(member)) 
         options.visibility = Visibility.PUBLIC // Solo blogs publicos
-      else
-        options.idClub = Number.parseInt(idClub) // Cualquier blos
 
       if (['info', 'blog'].includes(format)) {
+        console.table([1,2,3])
         const data = await Blog.query(
           getBlogCompleteQuery(format === 'info' ? 'content' : 'description') + ' where ' +
             whereBlogBuilder(Blog.table, options, {
@@ -315,12 +318,18 @@ export const BlogAPI = {
       // TODO: Personal Blogs
       // const { rows: items } = await (format === 'simple'
       let items
-      const baseConditions = {}
+      let baseConditions = {}
+
+      if (!isNaN(idClub)) {
+        baseConditions.idClub = Number.parseInt(idClub)
+      }
+
+      console.log(baseConditions)
 
       if (format === 'info' || format === 'blog') {
         const data = await Blog.query(
           getBlogCompleteQuery(format === 'info' ? 'content' : 'description') + ' where ' +
-          whereBlogBuilder(Blog.table, { ...options, visibility: Visibility.PUBLIC }, {
+          whereBlogBuilder(Blog.table, { ...options, ...baseConditions, visibility: Visibility.PUBLIC }, {
             idUser: '=',
             idClub: '=',
             title: '=~',
@@ -332,7 +341,7 @@ export const BlogAPI = {
         items = processRows(data, [0, 8, 11, 14])
       } else if(format === 'simple') {
         const { rows } = await Blog.query(
-          getBlogInfoQuery({ visibility: Visibility.PUBLIC })
+          getBlogInfoQuery({ ...baseConditions, visibility: Visibility.PUBLIC })
         )
         items = rows
       } else {

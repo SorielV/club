@@ -41,6 +41,7 @@ module.exports = {
   modules: [
     // Doc: https://github.com/nuxt-community/axios-module#usage
     '@nuxtjs/axios',
+    '@nuxtjs/auth',
     // Doc: https://buefy.github.io/#/documentation
     'nuxt-buefy'
   ],
@@ -50,7 +51,19 @@ module.exports = {
   axios: {
     // See https://github.com/nuxt-community/axios-module#options
   },
-
+  auth: {
+    strategies: {
+      local: {
+        endpoints: {
+          login: { url: '/api/auth/login', method: 'post', propertyName: 'token' },
+          logout: { url: '/api/auth/logout', method: 'post' },
+          user: { url: '/api/auth/user', method: 'get', propertyName: 'user' }
+        },
+        // tokenRequired: true,
+        // tokenType: 'bearer',
+      }
+    }
+  },
   /*
   ** Build configuration
   */

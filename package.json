@@ -13,6 +13,7 @@
     "precommit": "npm run lint"
   },
   "dependencies": {
+    "@nuxtjs/auth": "^4.5.3",
     "@nuxtjs/axios": "^5.0.0",
     "@toast-ui/vue-calendar": "^1.0.3",
     "bcrypt": "^3.0.3",

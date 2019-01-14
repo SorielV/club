@@ -5,10 +5,17 @@ import { ErrorHandle, HandleAuth, isAuth, isNotAuth, isAdmin } from './../../../
 
 const router = Router()
 
+/*
+  cookieBaseAuth,
+  sessionStorageBaseAuth,
+  logoutSessionStorageBase,
+  logoutCookieBase
+*/
+
 // TODO: Passport login (google, facebook, twitter, github)
 router
   .use(HandleAuth)
-  .get('/login', isAuth, (req, res, next) => {
+  .get('/user', isAuth, (req, res, next) => {
     return res
       .status(200)
       .json({ data: req.user })

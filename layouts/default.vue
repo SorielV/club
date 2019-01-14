@@ -4,6 +4,14 @@
     section
       nuxt.main-container
     //Footer
+    section.container(style="margin-top: 10%; margin-bottom: 2%;")
+      h1.title Dev
+      div
+        p Store
+        pre {{ $store.state }}
+      div
+        p Route
+        pre {{ routerInfo }}
 </template>
 
 <script>
@@ -15,6 +23,17 @@ export default {
   },
   data() {
     return {}
+  },
+  computed: {
+    routerInfo () {
+      const { name, path, query, params } = this.$route
+      return {
+        name,
+        path,
+        query,
+        params 
+      }
+    }
   }
 }
 </script>

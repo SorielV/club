@@ -8,8 +8,6 @@ export const authInformation = async (req) => {
   )
 }
 
-/** Required Auth **/
-
 // Normal Auth
 export const HandleAuth = async (req, res, next) => {
   try {
@@ -19,7 +17,7 @@ export const HandleAuth = async (req, res, next) => {
     } = await authInformation(req)
 
     req.user = user
-    req.token = token    
+    req.token = token
 
     return next()
   } catch (error) {
