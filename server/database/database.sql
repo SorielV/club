@@ -247,5 +247,19 @@ CREATE TABLE "Event"(
   "visibility" smallint default 1,
   "createdAt" date default current_timestamp,
   "updatedAt" date null
-)
+);
+
+select
+    "User".id,
+    "User".username,
+    "UserInfo"."firstName",
+    "UserInfo"."lastName",
+    "User".email,
+    "UserInfo"."profileImage",
+    "UserInfo".school,
+    (select array_to_json(array_agg(x)) from (select "ClubMember"."idClub", "ClubMember".rol from "ClubMember" where "ClubMember"."idUser" = "User".id) as x) as clubs
+  from "User"
+    inner join "UserInfo" on "User".id = "UserInfo"."idUser"
+ where "User".id = 1;
+
 

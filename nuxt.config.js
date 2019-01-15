@@ -8,6 +8,9 @@ module.exports = {
   */
   head: {
     title: pkg.name,
+    htmlAttrs: {
+      lang: 'es',
+    },
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -41,7 +44,7 @@ module.exports = {
   modules: [
     // Doc: https://github.com/nuxt-community/axios-module#usage
     '@nuxtjs/axios',
-    '@nuxtjs/auth',
+    // '@nuxtjs/auth',
     // Doc: https://buefy.github.io/#/documentation
     'nuxt-buefy'
   ],
@@ -57,12 +60,15 @@ module.exports = {
         endpoints: {
           login: { url: '/api/auth/login', method: 'post', propertyName: 'token' },
           logout: { url: '/api/auth/logout', method: 'post' },
-          user: { url: '/api/auth/user', method: 'get', propertyName: 'user' }
+          user: { url: '/api/v1/auth/user', method: 'get', propertyName: 'user' }
         },
         // tokenRequired: true,
         // tokenType: 'bearer',
       }
     }
+  },
+  router: {
+    middleware: 'auth-status'
   },
   /*
   ** Build configuration

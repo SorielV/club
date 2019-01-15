@@ -25,14 +25,18 @@
               | Clubes
             nuxt-link(to='/topics').navbar-item
               | Temas
-            span.navbar-item
-              a.button.is-info
-                span.icon
-                  i.mdi.mdi-github
-                span Registro
-            span.navbar-item
-              nuxt-link(to='/login').button.is-danger
-                span.icon
-                  i.mdi.mdi-github
-                span Login
+            template(v-if="$store.state.isAuth")
+              span.navbar-item
+                p Logged as {{ $store.state.user.username }}
+            template(v-else)
+              span.navbar-item
+                a.button.is-info
+                  span.icon
+                    i.mdi.mdi-github
+                  span Registro
+              span.navbar-item
+                nuxt-link(to='/login').button.is-danger
+                  span.icon
+                    i.mdi.mdi-github
+                  span Login
 </template>

@@ -12,11 +12,15 @@
       div
         p Route
         pre {{ routerInfo }}
+      div
+        p Nuxt
+        pre {{ Object.keys($nuxt) }}
 </template>
 
 <script>
 import { Header, Footer } from '~/components'
 export default {
+  middleware: 'auth-status',
   components: {
     Header,
     Footer

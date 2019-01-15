@@ -10,6 +10,7 @@ import {
   slugify
 } from './format'
 import { userInfo } from 'os';
+import { isNullOrUndefined } from 'util';
 
 function Schema(name, { table, primaryKey, fields, options, validation }) {
   // Prevent
@@ -61,15 +62,15 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
       break
 
       case Number:
-        if (fields[prop].min && value > fields[prop].max) {
+        if (!isNullOrUndefined(fields[prop].min) && value < fields[prop].min) {
           throw new Error(
-            `Campo ${prop} debera ser menor a ${fields[prop].max}`
+            `Campo ${prop} debera ser mayor a ${fields[prop].min}`
           )
         }
 
-        if (fields[prop].max && value < fields[prop].max) {
+        if (!isNullOrUndefined(fields[prop].max) && value > fields[prop].max) {
           throw new Error(
-            `Campo ${prop} debera ser mayor a ${fields[prop].max}`
+            `Campo ${prop} debera ser menor a ${fields[prop].max}`
           )
         }
       break

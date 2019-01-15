@@ -1,5 +1,5 @@
 const axios = require('axios')
-const axiosAPI = axios.create({ baseURL: 'http://localhost:3000/api/v1' })
+const axiosAPI = axios.create({ baseURL: '/api/v1' })
 
 const API = new Proxy({}, {
   get: (target, name) => (

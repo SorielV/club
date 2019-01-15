@@ -26,11 +26,11 @@ const actions = {
       throw err
     }
   },
-  async checkLogin() {
+  async checkLogin({ commit }) {
     try {
       const {
         data: { data }
-      } = await this.$axios.get('/api/v1/auth/user', { username, password })
+      } = await this.$axios.get('/api/v1/auth/user')
 
       commit('login', data)
       return

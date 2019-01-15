@@ -1,7 +1,7 @@
 import Schemata from './../../utils/Schema'
 
 export const Model = {
-  table: 'Clubs',
+  table: 'Club',
   primaryKey: ['id'],
   fields: {
     id: {

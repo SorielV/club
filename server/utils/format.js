@@ -225,6 +225,12 @@ export const mergeObject = (target, { ...object })  => {
 // TODO: A best way of clone object
 export const cloneObject = (object) => JSON.parse(JSON.stringify(object))
 
+
+/* 
+Alternative https://hashrocket.com/blog/posts/faster-json-generation-with-postgresql
+[Postgres Only]
+*/
+
 /**
  * 
  * @param {array}  

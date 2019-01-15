@@ -190,7 +190,8 @@ CREATE TABLE public."Club" (
     slug character varying(20) NOT NULL,
     description character varying(255),
     "createdAt" date DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" date
+    "updatedAt" date,
+    visibility smallint DEFAULT 1
 );
 
 
@@ -231,6 +232,44 @@ ALTER TABLE public."ClubInfo_id_seq" OWNER TO postgres;
 --
 
 ALTER SEQUENCE public."ClubInfo_id_seq" OWNED BY public."ClubInfo".id;
+
+
+--
+-- Name: ClubMember; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."ClubMember" (
+    id integer NOT NULL,
+    "idClub" integer,
+    "idUser" integer,
+    rol smallint DEFAULT 0,
+    "createdAt" date DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" date
+);
+
+
+ALTER TABLE public."ClubMember" OWNER TO postgres;
+
+--
+-- Name: ClubMember_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."ClubMember_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."ClubMember_id_seq" OWNER TO postgres;
+
+--
+-- Name: ClubMember_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."ClubMember_id_seq" OWNED BY public."ClubMember".id;
 
 
 --
@@ -380,7 +419,7 @@ CREATE TABLE public."User" (
     id integer NOT NULL,
     username character varying(20) NOT NULL,
     email character varying(80) NOT NULL,
-    password character varying(120) NOT NULL,
+    password character varying(80) NOT NULL,
     "createdAt" date DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" date
 );
@@ -642,6 +681,13 @@ ALTER TABLE ONLY public."ClubInfo" ALTER COLUMN id SET DEFAULT nextval('public."
 
 
 --
+-- Name: ClubMember id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."ClubMember" ALTER COLUMN id SET DEFAULT nextval('public."ClubMember_id_seq"'::regclass);
+
+
+--
 -- Name: Event id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -723,10 +769,11 @@ COPY public."Calendar" (id, "idClub", "createdAt") FROM stdin;
 -- Data for Name: Club; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Club" (id, "idUser", identifier, slug, description, "createdAt", "updatedAt") FROM stdin;
-1	1	JS	js	Javascript	2019-01-05	\N
-2	1	NodeJS	nodejs	NodeJS <3	2019-01-05	\N
-3	1	VueJS	vuejs	VueJS	2019-01-05	\N
+COPY public."Club" (id, "idUser", identifier, slug, description, "createdAt", "updatedAt", visibility) FROM stdin;
+1	1	JS	js	Javascript	2019-01-05	\N	1
+2	1	NodeJS	nodejs	NodeJS <3	2019-01-05	\N	1
+3	1	VueJS	vuejs	VueJS	2019-01-05	\N	1
+4	1	1	slug	1	\N	\N	1
 \.
 
 
@@ -738,6 +785,17 @@ COPY public."ClubInfo" (id, "idClub", content, "createdAt", "updatedAt") FROM st
 1	1	Bet Javascript	2019-01-05	\N
 2	2	#NodeJS MD	2019-01-05	\N
 3	3	#VueJS MD	2019-01-05	\N
+\.
+
+
+--
+-- Data for Name: ClubMember; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."ClubMember" (id, "idClub", "idUser", rol, "createdAt", "updatedAt") FROM stdin;
+1	1	1	1	2019-01-15	\N
+2	2	1	1	2019-01-15	\N
+3	3	1	1	2019-01-15	\N
 \.
 
 
@@ -777,7 +835,6 @@ COPY public."Topic" (id, topic, slug) FROM stdin;
 --
 
 COPY public."User" (id, username, email, password, "createdAt", "updatedAt") FROM stdin;
-1	Soriel	xxsorielxx@gmail.com	R	2019-01-04	\N
 74730	Lorena_Hackett65	Paris.Swift@gmail.com	FEr6oeHAFNi5RMT	2019-01-04	\N
 74731	Lavern.Champlin	Emmy_Wilkinson@gmail.com	Oo2Uw7S_j6ZDVgL	2019-01-04	\N
 74732	Vernon_Schulist63	Wilma_Schmitt84@hotmail.com	1QMp2Tzss8nNUDz	2019-01-04	\N
@@ -1193,6 +1250,7 @@ COPY public."User" (id, username, email, password, "createdAt", "updatedAt") FRO
 75434	Winston42	Kory.Farrell37@yahoo.com	KNnePO9xpukqRjF	2019-01-04	\N
 75443	Jayme12	Deonte85@hotmail.com	AqTXZKh6_caFJpc	2019-01-04	\N
 75455	Curt.Farrell	Meaghan84@hotmail.com	MY8Cg8H9wPAkWbd	2019-01-04	\N
+1	Soriel	xxsorielxx@gmail.com	$2b$06$gvJa0wz9QCMRPOFbrsk.2e9otLwgg3RGx4rGLjmeW2dv6RO8PEUqi	2019-01-04	\N
 74820	Randal11	Dawn9@hotmail.com	HvUbTqSTXl3Jbe2	2019-01-04	\N
 74830	Kadin_Buckridge	Treva_Haley@hotmail.com	u8oLAPYln8KPNL9	2019-01-04	\N
 74840	Dedric.Fay78	Issac_Howe14@yahoo.com	vl7O9pT26v7aVsm	2019-01-04	\N
@@ -10814,10 +10872,17 @@ SELECT pg_catalog.setval('public."ClubInfo_id_seq"', 3, true);
 
 
 --
+-- Name: ClubMember_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public."ClubMember_id_seq"', 3, true);
+
+
+--
 -- Name: Club_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Club_id_seq"', 3, true);
+SELECT pg_catalog.setval('public."Club_id_seq"', 6, true);
 
 
 --
@@ -10893,6 +10958,14 @@ ALTER TABLE ONLY public."Calendar"
 
 ALTER TABLE ONLY public."ClubInfo"
     ADD CONSTRAINT "ClubInfo_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: ClubMember ClubMember_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."ClubMember"
+    ADD CONSTRAINT "ClubMember_pkey" PRIMARY KEY (id);
 
 
 --
@@ -11066,6 +11139,22 @@ ALTER TABLE ONLY public."Calendar"
 
 ALTER TABLE ONLY public."ClubInfo"
     ADD CONSTRAINT "ClubInfo_idClub_fkey" FOREIGN KEY ("idClub") REFERENCES public."Club"(id);
+
+
+--
+-- Name: ClubMember ClubMember_idClub_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."ClubMember"
+    ADD CONSTRAINT "ClubMember_idClub_fkey" FOREIGN KEY ("idClub") REFERENCES public."Club"(id);
+
+
+--
+-- Name: ClubMember ClubMember_idUser_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."ClubMember"
+    ADD CONSTRAINT "ClubMember_idUser_fkey" FOREIGN KEY ("idUser") REFERENCES public."User"(id);
 
 
 --
