@@ -13,6 +13,7 @@
           b-tab-item(label='raw')
             section(v-for="blog in blogs")
               pre(@click="gotoBlog(blog)") {{ blog }}
+              br
           b-tab-item(label='component')
             section(v-for="blog in blogs")
               Blog(@click="gotoBlog(blog)" :blog="blog")

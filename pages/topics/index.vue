@@ -2,15 +2,11 @@
   section.section
     .container
       div.is-flex
-        h1.title Clubs
-        .buttons(style="margin: auto")
-          button.button.is-white Format =>
-          button.button.is-info(@click="getClubs('simple')") Simple
-          button.button.is-link(@click="getClubs('complete')") Complete
+        h1.title Topics
       hr
     .container
       pre 
-        p Blogs
+        p Topics
       section
         b-tabs.block(position='is-centered')
           b-tab-item(label='raw')
@@ -18,33 +14,18 @@
               pre(@click="toClub(club)") {{ club }}
               br
           b-tab-item(label='component')
-            template(v-if="format === 'simple'")
-              .row.columns.is-multiline
-                .column.is-one-third(v-for="club in clubs")
-                  ClubInfo(@click="toClub(club)" :club="club")
-                  br
-            template(v-else)
-              .row.columns.is-multiline.is-centered
-                .column.is-7(v-for="club in clubs")
-                  Club(@click="toClub(club)" :club="club")
-                  br
-            pre https://github.com/dansup/bulma-templates/blob/master/templates/cards.html
+            //TODO: Topic Component
+            pre TODO
 </template>
 
 <script>
-import ClubInfo from '@/components/club/info'
-import Club from '@/components/club/'
-
 export default {
-  components: {
-    Club,
-    ClubInfo
-  },
+  components: {},
   async asyncData({ app }) {
     try {
       const {
         data: { data: clubs }
-      } = await app.$axios.get('/api/v1/club') 
+      } = await app.$axios.get('/api/v1/topic') 
       return { clubs }
     } catch(error) {
       return { clubs: [] }
@@ -73,4 +54,3 @@ export default {
   }
 }
 </script>
-

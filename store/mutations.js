@@ -1,7 +1,9 @@
 const mutations = {
-  login: (state, { token, ...user }) => {
+  login: (state, data) => {
+    alert(JSON.stringify(data))
+    const { token = null, ...user } = data
     state.isAuth = true
-    state.token = token
+    state.token = token || null
     state.user = user
   },
   logout: state => {

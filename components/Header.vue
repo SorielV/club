@@ -23,13 +23,15 @@
               | Sobre nosotros
             nuxt-link(to='/clubs').navbar-item
               | Clubes
+            nuxt-link(to='/topics').navbar-item
+              | Temas
             span.navbar-item
               a.button.is-info
                 span.icon
                   i.mdi.mdi-github
                 span Registro
             span.navbar-item
-              a.button.is-danger
+              nuxt-link(to='/login').button.is-danger
                 span.icon
                   i.mdi.mdi-github
                 span Login

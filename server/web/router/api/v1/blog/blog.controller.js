@@ -35,7 +35,6 @@ const processRow = ({ rows, fields }, index) => {
     return {}
   }
 
-  console.log(rows)
   return castObjectfromArraywithIndex(
     rows,
     fields.map(({ name }) => name),
@@ -170,13 +169,12 @@ const getTagsQuery = (idBlog) => {
 }
 
 const getBlogInfoQuery = (_options, allowed) => {
-  console.log(VBlog.allowedFilter.concat(allowed))
 
   const options = formatAllowedOptions(
     _options,
     {
       table: VBlog.table,
-      allowed: VBlog.allowedFilter.concat(allowed)
+      allowed: VBlog.allowedFilter.concat(allowed || [])
     }
   )
 
@@ -277,6 +275,12 @@ export const BlogAPI = {
 
     if (req.params.id) {
       // Difentes where conditions
+      if (isNaN(req.params.id)) {
+        throw new Error('Formato de parametro \'id\' no valido')
+      } else if (idClub && isNaN(idClub)) {
+        throw new Error('Formato de parametro \'idClub\' no valido')
+      }
+
       let item
       let options = { id: Number.parseInt(req.params.id) }
 
@@ -284,8 +288,9 @@ export const BlogAPI = {
         options.idClub = Number.parseInt(idClub)
       }
 
-      if (isNullOrUndefined(member)) 
-        options.visibility = Visibility.PUBLIC // Solo blogs publicos
+      if (isNullOrUndefined(member)) {// Solo blogs publicos
+        options.visibility = Visibility.PUBLIC
+      }
 
       if (['info', 'blog'].includes(format)) {
         console.table([1,2,3])
@@ -320,11 +325,13 @@ export const BlogAPI = {
       let items
       let baseConditions = {}
 
-      if (!isNaN(idClub)) {
-        baseConditions.idClub = Number.parseInt(idClub)
+      if (idClub) {
+        if (isNaN(idClub)) {
+          throw new Error('Formato de parametro \'idClub\' no valido')
+        } else {
+          baseConditions.idClub = Number.parseInt(idClub)
+        }
       }
-
-      console.log(baseConditions)
 
       if (format === 'info' || format === 'blog') {
         const data = await Blog.query(

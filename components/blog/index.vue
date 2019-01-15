@@ -1,4 +1,4 @@
-<template lang="pug">
+<!--template lang="pug">
   section
     .card.article
       .card-content
@@ -12,6 +12,27 @@
               |  {{ blog.createdAt }}
         .content.article-body
           pre {{ blog.content }}
+</template-->
+
+<template lang="pug">
+  .blog-container
+    .blog-header
+      .blog-cover
+        .blog-author
+          h3 {{ blog.idUser }}
+    .blog-body
+      br
+      .content
+        h1.title
+          a(href='#') {{ blog.title }}
+        p {{ blog.content }}
+      .tags
+        span(v-for="tag in blog.tag").tag.is-light {{ tag.tag }}
+        span(v-for="topic in blog.topic").tag.is-dark {{ topic.topic }}
+    .blog-footer
+      .container
+        .has-text-centered
+          p Some information
 </template>
 
 <script>
@@ -26,6 +47,88 @@ export default {
 </script>
 
 <style scoped>
+.blog-container {
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 4px 2px -2px;
+  font-family: "adelle-sans", sans-serif;
+  font-weight: 100;
+  margin: 48px auto;
+  width: 20rem;
+}
+@media screen and (min-width: 480px) {
+  .blog-container {
+    width: 28rem;
+  }
+}
+@media screen and (min-width: 767px) {
+  .blog-container {
+    width: 40rem;
+  }
+}
+@media screen and (min-width: 959px) {
+  .blog-container {
+    width: 50rem;
+  }
+}
+
+.blog-container a {
+  color: #4d4dff;
+  text-decoration: none;
+  transition: .25s ease;
+}
+.blog-container a:hover {
+  border-color: #ff4d4d;
+  color: #ff4d4d;
+}
+
+.blog-cover {
+  background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/17779/yosemite-3.jpg");
+  background-size: cover;
+  border-radius: 5px 5px 0 0;
+  height: 15rem;
+  box-shadow: inset rgba(0, 0, 0, 0.2) 0 64px 64px 16px;
+}
+
+.blog-author,
+.blog-author--no-cover {
+  margin: 0 auto;
+  padding-top: .125rem;
+  width: 80%;
+}
+
+.blog-author h3::before,
+.blog-author--no-cover h3::before {
+  background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/17779/russ.jpeg");
+  background-size: cover;
+  border-radius: 50%;
+  content: " ";
+  display: inline-block;
+  height: 32px;
+  margin-right: .5rem;
+  position: relative;
+  top: 8px;
+  width: 32px;
+}
+
+.blog-author h3 {
+  color: #fff;
+  font-weight: 100;
+}
+
+.blog-author--no-cover h3 {
+  color: #999999;
+  font-weight: 100;
+}
+
+.blog-body {
+  margin: 0 auto;
+  width: 80%;
+}
+</style>
+
+
+<!--style scoped>
 .articles {
   margin: 5rem 0;
   margin-top: -200px;
@@ -74,4 +177,4 @@ div.column.is-8:first-child {
 .promo-block .container {
   margin: 1rem 5rem;
 }
-</style>
+</style-->

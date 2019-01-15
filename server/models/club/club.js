@@ -13,6 +13,17 @@ export const Model = {
       type: Number,
       required: true
     },
+    identifier: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 20
+    },
+    slug: {
+      type: String,
+      required: false,
+      default: 'slug'
+    },
     description: {
       type: String,
       allowNull: true,

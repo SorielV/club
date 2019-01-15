@@ -1,7 +1,7 @@
 const actions = {
   async logout() {
     try {
-      await this.$axios.get('/auth/logout')
+      await this.$axios.get('/api/v1/auth/logout')
       commit('logout')
       
     } catch(err) {
@@ -13,20 +13,24 @@ const actions = {
     try {
       const {
         data: { data }
-      } = this.$axios.post('/auth/login', { username, password })
+      } = await this.$axios.post('/api/v1/auth/login', { username, password })
+
+      /*if (!data.token) {
+        data.token = null
+      }*/
 
       commit('login', data)
-      return
+      return {}
     } catch(err) {
       alert(err.message)
-      return
+      throw err
     }
   },
   async checkLogin() {
     try {
       const {
         data: { data }
-      } = this.$axios.get('/auth/login', { username, password })
+      } = await this.$axios.get('/api/v1/auth/user', { username, password })
 
       commit('login', data)
       return

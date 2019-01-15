@@ -7,7 +7,7 @@ const router = Router()
 router
   .get('/', ErrorHandle(Controller.getClubs))
   .get('/:id', ErrorHandle(Controller.getClub))
-  //.use(HandleAuth, isAuth)
+  .use(HandleAuth, isAuth)
   .post('/', ErrorHandle(Controller.createClub))
   .put('/:id', ErrorHandle(Controller.updateClub))
   .delete('/:id', ErrorHandle(Controller.deleteClub))
