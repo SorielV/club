@@ -232,10 +232,9 @@ Alternative https://hashrocket.com/blog/posts/faster-json-generation-with-postgr
 */
 
 /**
- * 
  * @param {array}  
  * @param {*} properties
- * @param {*} index 
+ * @param {*} index
  */
 export const castObjectfromArraywithIndex = ([...samples], [...props], index) => {
   console.time('castObjectfromArraywithIndex')
@@ -362,7 +361,11 @@ export const getProperties = (data, props) => (
   } , {})
 )
 
-const slugify = (text) => {
+/**
+ * https://gist.github.com/mathewbyrne/1280286
+ * @Author {mathewbyrne}
+ */
+export const slugify = (text) => {
   return text
     .toString()
     .toLowerCase()

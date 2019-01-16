@@ -17,6 +17,7 @@ import 'tui-calendar/dist/tui-calendar.css'
 import { Calendar } from '@toast-ui/vue-calendar'
 
 export default {
+  layout: 'club',
   components: {
     Calendar
   },

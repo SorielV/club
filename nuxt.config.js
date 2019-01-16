@@ -68,7 +68,7 @@ module.exports = {
     }
   },
   router: {
-    middleware: 'auth-status'
+    middleware: ['auth-status', 'club-member']
   },
   /*
   ** Build configuration

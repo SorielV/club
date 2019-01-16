@@ -7,11 +7,12 @@
           button.button.is-white Format =>
           button.button.is-info(@click="getClubs('simple')") Simple
           button.button.is-link(@click="getClubs('complete')") Complete
-          button.button.is-danger(@click="showModalAddClub") Add
+          button.button.is-danger(
+            v-if="$store.state.isAuth"
+            @click="showModalAddClub"
+          ) Add
       hr
     .container
-      pre 
-        p Blogs
       section
         b-tabs.block(position='is-centered')
           b-tab-item(label='raw')
@@ -45,49 +46,67 @@
           section.modal-card-body
             // [Inputs] Add Club
             b-field(
-              label="identifier"
+              label="Identificador"
             )
-            b-input(
-              placeholder='identifier'
-              type="text"
-              required="true"
-              maxLength="20"
-              :has-counter="true"
-              v-model="modals.club.data.identifier"
-            )
+              b-input(
+                placeholder='identifier'
+                type="text"
+                required="true"
+                maxlength="20"
+                :has-counter="true"
+                v-model="modals.club.data.identifier"
+              )
 
             b-field(
-              label="description"
+              label="Slug"
             )
-            b-input(
-              placeholder='description'
-              type="textarea"
-              required="false"
-              maxLength="255"
-              :has-counter="true"
-              v-model="modals.club.data.description"
-            )
+              b-input(
+                placeholder='slug'
+                type="text"
+                required="true"
+                maxlength="20"
+                disabled='true'
+                :has-counter="true"
+                :value="slugify(modals.club.data.identifier || '')"
+              )
 
             b-field(
-              label="visibility"
+              label="Descripcion"
             )
-            b-input(
-              placeholder="visibility"
-              type="number"
-              required="false"
-              min="0"
-              max="4"
-              v-model="modals.club.data.visibility"
+              b-input(
+                placeholder='description'
+                type="textarea"
+                required="false"
+                maxlength="255"
+                :has-counter="true"
+                v-model="modals.club.data.description"
+              )
+
+            b-field(
+              label="Visibilidad"
             )
+              .select(v-model="modals.club.data.visibility")
+                select
+                  option(:value="0") Publico
+                  option(:value="1") Privado
           footer.modal-card-foot
             button.button(type='button', @click='close()') Close
             button.button.is-dark Save
 </template>
 
 <script>
-import ClubInfo from '@/components/club/info'
-import Club from '@/components/club/'
+import { Club, Info as ClubInfo }  from '@/components/club/'
 
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+    .replace(/^-+/, '') // Trim - from start of text
+    .replace(/-+$/, '') // Trim - from end of text
+}
 
 const timeout = (ms) => (new Promise(resolve => setTimeout(resolve, ms)))
 
@@ -128,12 +147,19 @@ export default {
         club: {
           isActive: false,
           isLoading: false,
-          data: {}
+          data: {
+            visibility: 0,
+            identifier: 'template',
+            description: 'A popular club of open source projects.'
+          }
         } 
       }
     }
   },
   methods: {
+    slugify(text) {
+      return slugify(text)
+    },
     // Show modal add club
     showModalAddClub() {
       this.modals.club.isActive = true

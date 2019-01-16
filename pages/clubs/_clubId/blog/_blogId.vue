@@ -21,6 +21,7 @@
 import Blog from '@/components/blog'
 
 export default {
+  layout: 'club',
   components: {
     Blog
   },

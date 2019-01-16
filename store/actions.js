@@ -35,7 +35,7 @@ const actions = {
       commit('login', data)
       return
     } catch(err) {
-      alert(err.message)
+      console.log(err.message)
       return
     }
   },

@@ -38,11 +38,29 @@ export const LoginAPI = {
 
     if (match) { // login
       // TODO: Fetch rquired data (club, infoUser)
+      const fetchUser = `
+        select
+          "User".id,
+          "User".username,
+          "UserInfo"."firstName",
+          "UserInfo"."lastName",
+          "User".email,
+          "UserInfo"."profileImage",
+          "UserInfo".school,
+          (select array_to_json(array_agg(x)) from (select "ClubMember"."idClub", "ClubMember".rol from "ClubMember" where "ClubMember"."idUser" = "User".id) as x) as clubs
+        from "User"
+          inner join "UserInfo" on "User".id = "UserInfo"."idUser"
+        where "User".id = ${user.id};
+      `
+
+      const{ rows: [loginInfo] }  = await User.query(fetchUser)
+
+      console.log(loginInfo)
 
       if (process.env.AUTH_BASE === 'st') {
-        await sessionStorageBase(res, user)
+        await sessionStorageBase(res, loginInfo)
       } else {
-        await cookieBase(res, user)
+        await cookieBase(res, loginInfo)
       }
 
       return res

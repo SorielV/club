@@ -83,8 +83,8 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     return value
   }
 
-  function Schema(data, validate = true) {    
-    for (const prop in validation ? proxy : data) {
+  function Schema(data, validate = true) {
+    for (const prop in isNullOrUndefined(validation) ? data : proxy) {
       this[prop] = null
     }
     
@@ -178,6 +178,8 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
         .toString()
         .replace('\'default\'', 'default')
       )
+
+      console.log(item)
 
       // Reset Proxy
       this.constructor.prototype._isSet = false

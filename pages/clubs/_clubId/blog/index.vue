@@ -1,10 +1,5 @@
 <template lang="pug">
   section
-    br
-    .container
-      pre Club
-      pre {{ club }}
-    br
     .container
       pre 
         p Blogs
@@ -24,6 +19,7 @@
 import Blog from '@/components/blog/info.vue'
 
 export default {
+  layout: 'club',
   components: {
     Blog
   },

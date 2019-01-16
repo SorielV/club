@@ -13,11 +13,7 @@ export const Model = {
       type: Number,
       required: true
     },
-    idUser: {
-      type: Number,
-      required: true
-    },
-    description: {
+    content: {
       type: String,
       allowNull: true,
       maxLength: 1200

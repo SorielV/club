@@ -2,7 +2,11 @@ import Knex from 'knex'
 const knex = Knex({ client: 'pg' })
 
 import { Club, ClubInfo, ClubMember } from './../../../../../models/club'
-import { formatAllowedOptions, knexMethod } from './../../../../../utils/format'
+import { 
+  formatAllowedOptions,
+  knexMethod,
+  slugify
+} from './../../../../../utils/format'
 
 // Vistas
 const VClub = {
@@ -104,10 +108,21 @@ Club.getClubs = async function(options, short = true) {
 */
 const API = {
   createClub: async (req, res, next) => {
-    console.log(req.user)
     const { id: idUser } = req.user
-    const item = await new Club({ ...req.body, idUser }).save()
-    const member = await new ClubMember({ idClub: item.id, idUser }).save()
+    const item = await new Club({
+      ...req.body,
+      idUser,
+      slug: slugify(req.body.identifier)
+    }).save()
+
+    // TODO: Enum [member, admin, owner]
+    const member = await new ClubMember({
+      idClub: item.id,
+      idUser,
+      rol: 2 
+    }).save()
+
+    const clubInfo = await new ClubInfo({ idClub: item.id, idUser }).save()
 
     return res
       .status(201)

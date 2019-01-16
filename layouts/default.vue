@@ -4,26 +4,17 @@
     section
       nuxt.main-container
     //Footer
-    section.container(style="margin-top: 10%; margin-bottom: 2%;")
-      h1.title Dev
-      div
-        p Store
-        pre {{ $store.state }}
-      div
-        p Route
-        pre {{ routerInfo }}
-      div
-        p Nuxt
-        pre {{ Object.keys($nuxt) }}
+    Dev
 </template>
 
 <script>
-import { Header, Footer } from '~/components'
+import { Header, Footer, Dev } from '~/components'
 export default {
-  middleware: 'auth-status',
+  middleware: ['auth-status'],
   components: {
     Header,
-    Footer
+    Footer,
+    Dev
   },
   data() {
     return {}
