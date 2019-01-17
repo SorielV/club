@@ -188,7 +188,8 @@ const getBlogInfoQuery = (_options, allowed) => {
 const getBlogCompleteQuery = (blogExclude = 'content') => {
   const query = `select 
     ${[
-      ...exclude.apply(Blog.fieldsName, [Blog.table, [].concat(blogExclude || [])]), 
+      ...exclude.apply(Blog.fieldsName, [Blog.table, [].concat(blogExclude || [])]),
+      ...exclude.apply(['idUser', 'username', 'profileImage', 'firstName'], ['UserProfile', ['idUser']]),
       ...exclude.apply(Object.keys(VBlogTag.fields), [VBlogTag.table, 'idBlog', 'tag']),
       ...exclude.apply(Object.keys(VBlogTopic.fields), [VBlogTopic.table, 'idBlog', 'topic'])
       ].join(',')
@@ -196,6 +197,7 @@ const getBlogCompleteQuery = (blogExclude = 'content') => {
     from "${Blog.table}"
       left join "${VBlogTopic.table}" on "${VBlogTopic.table}"."idBlog" = "${Blog.table}".id
       left join "${VBlogTag.table}" on "${VBlogTag.table}"."idBlog" = "${Blog.table}".id
+      inner join "${'UserProfile'}" on "${'UserProfile'}"."idUser" = "${Blog.table}"."idUser"
   `
   return query
 }
@@ -266,7 +268,7 @@ export const BlogAPI = {
   getBlog: async (req, res, next) => {
     const { 
       query: {
-        format = 'simple', 
+        format = 'info', 
         idClub = null, // !
         ...options
       },
@@ -293,7 +295,6 @@ export const BlogAPI = {
       }
 
       if (['info', 'blog'].includes(format)) {
-        console.table([1,2,3])
         const data = await Blog.query(
           getBlogCompleteQuery(format === 'info' ? 'content' : 'description') + ' where ' +
             whereBlogBuilder(Blog.table, options, {
@@ -304,7 +305,8 @@ export const BlogAPI = {
             .join(' and '),
             { rowMode: 'array' }
         )
-        item = processRow(data, [0, 8, 11, 14])
+        const offset = 3 // Field in userProfile
+        item = processRow(data, [0, 8 + offset, 11 + offset, 14 + offset])
       } else if (format === 'simple') {
         const { rows } = await Blog.query(getBlogInfoQuery(options, ['visibility']))
         item = rows[0]
@@ -345,7 +347,8 @@ export const BlogAPI = {
           }).join(' and '),
           { rowMode: 'array' }
         )
-        items = processRows(data, [0, 8, 11, 14])
+        const offset = 3 // Field in userProfile
+        items = processRows(data, [0, 8 + offset, 11 + offset, 14 + offset])
       } else if(format === 'simple') {
         const { rows } = await Blog.query(
           getBlogInfoQuery({ ...baseConditions, visibility: Visibility.PUBLIC })

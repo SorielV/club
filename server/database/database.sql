@@ -263,3 +263,5 @@ select
  where "User".id = 1;
 
 
+/static/profile/soriel.jpg
+

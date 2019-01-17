@@ -3,20 +3,33 @@
     .container
       div.is-flex
         h1.title Blogs
-        .buttons(style="margin: auto")
+        //-.buttons(style="margin: auto")
           button.button.is-white Format =>
           button.button.is-info(@click="getBlogs('simple')") Simple
           button.button.is-link(@click="getBlogs('info')") Info
           button.button.is-danger(@click="getBlogs('blog')") Blog
 
       hr
-      div(v-for="blog in blogs")
-        pre {{ blog }}
-        br
+      b-tabs.block(
+          v-model="selectedTab"
+          position='is-centered'
+        )
+          b-tab-item(label='raw')
+            div(v-for="blog in blogs")
+              pre {{ blog }}
+              br
+          b-tab-item(label='component')
+            div(v-for="blog in blogs")
+              BlogInfo(:blog="blog")
 </template>
 
 <script>
+import { Info as BlogInfo } from '~/components/blog'
+
 export default {
+  components: {
+    BlogInfo
+  },
   async asyncData({ app }) {
     try {
       const {
@@ -29,8 +42,8 @@ export default {
   },
   data() {
     return {
-      blogs: [1]
-      
+      blogs: [],
+      selectedTab: 1
     }
   },
   methods: {

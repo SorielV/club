@@ -21,33 +21,14 @@
             a.tag.is-gray(
               v-for="tag in blog.tag || []"
             ) {{ tag.tag }}
+    br
+    .blog-card(style="padding: 1rem 0;")
+      slot(name="rating")
+    br
+    .blog-card(style="padding: 1rem")
+      slot(name="commnets")
 </template>
 
-<!--template lang="pug">
-  .blog-container
-    .blog-header
-      .blog-cover
-        .blog-author
-          h3 {{ blog.idUser }}
-    .blog-body
-      br
-      .content
-        h1.title
-          a(href='#') {{ blog.title }}
-        // Dangerous
-        VueShowdown(
-          :markdown="blog.content"
-          flavor="github"
-          :options="{ emoji: true }"
-        )
-      .tags
-        span(v-for="tag in blog.tag").tag.is-light {{ tag.tag }}
-        span(v-for="topic in blog.topic").tag.is-dark {{ topic.topic }}
-    .blog-footer
-      .container
-        .has-text-centered
-          p Some information
-</template-->
 
 <script>
 import { VueShowdown } from 'vue-showdown'
@@ -81,6 +62,41 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.blog-card {
+  background-color: white;
+  -webkit-box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  color: #4a4a4a;
+}
+</style>
+
+<!--template lang="pug">
+  .blog-container
+    .blog-header
+      .blog-cover
+        .blog-author
+          h3 {{ blog.idUser }}
+    .blog-body
+      br
+      .content
+        h1.title
+          a(href='#') {{ blog.title }}
+        // Dangerous
+        VueShowdown(
+          :markdown="blog.content"
+          flavor="github"
+          :options="{ emoji: true }"
+        )
+      .tags
+        span(v-for="tag in blog.tag").tag.is-light {{ tag.tag }}
+        span(v-for="topic in blog.topic").tag.is-dark {{ topic.topic }}
+    .blog-footer
+      .container
+        .has-text-centered
+          p Some information
+</template-->
 
 <!--style scoped>
 .blog-container {

@@ -3,13 +3,13 @@
     article.media
       figure.media-left
         p.image.is-64x64
-          img(:src="blog.username || 'https://cdn2.iconfinder.com/data/icons/nodejs-1/512/nodejs-512.png'")
+          img(:src="blog.profileImage || 'https://cdn2.iconfinder.com/data/icons/nodejs-1/512/nodejs-512.png'")
       .media-content
         .content
           p
-            strong {{ blog.firstName }}
-            small @{{ blog.username }}
-            small {{ blog.createdAt }}
+            strong {{ blog.firstName + ' ' }}
+            small {{ '#' + blog.username }}
+            small {{ '\t' + blog.createdAt }}
             br
             a.title(@click="goto") {{ blog.title }}
             p.subtitle {{ blog.description }}

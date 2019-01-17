@@ -30,6 +30,7 @@
                 Comment
                 Comment
                 Comment
+
       pre https://github.com/dansup/bulma-templates/blob/master/templates/blog.html
 </template>
 
@@ -37,15 +38,9 @@
 import { Blog, Comment } from '@/components/blog'
 
 export default {
-  layout: 'club',
   components: {
     Blog,
     Comment
-  },
-  head() {
-    return {
-      title: 'Club'
-    }
   },
   // Fetch Blog [High Priority]
   async asyncData({ app, params: { clubId, blogId } }) {
@@ -71,20 +66,9 @@ export default {
     }
   },
   data() {
-    const clubId = this.$route.params.clubId
     return {
-      clubId: clubId,
-      club: this.$store.getters.getClub(clubId),
       blog: {},
       selectedTab: 1
-    }
-  },
-  // Fetch Club Info [Low Priority]
-  async created() {
-    const { clubId } = this
-    if (!this.$store.getters.hasClubInformation(clubId)) {
-      await this.$store.dispatch('getClub', clubId)
-      this.club = this.$store.getters.getClub(clubId)
     }
   }
 }
