@@ -9,3 +9,5 @@ export {
   Club,
   Info
 }
+
+export default Club

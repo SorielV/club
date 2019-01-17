@@ -1,4 +1,4 @@
-import { Model } from './../models/club/club'
+import { Model } from './../models/blog/blog'
 import { isNullOrUndefined } from 'util';
 
 const StringField = (label, { required = false, maxLength = null }) => {

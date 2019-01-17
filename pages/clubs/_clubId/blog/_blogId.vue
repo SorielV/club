@@ -1,20 +1,13 @@
 <template lang="pug">
-  section
-    br
-    .container
-      pre Club
-      pre {{ club }}
-    br
-    .container
-      pre 
-        p Blog
+  section.section
+    .container.is-fluid
       section
-        b-tabs.block(position='is-centered')
+        b-tabs.block(position='is-centered' v-model="selectedTab")
           b-tab-item(label='raw')
             pre {{ blog }}
           b-tab-item(label='component')
             Blog(:blog='blog')
-            pre https://github.com/dansup/bulma-templates/blob/master/templates/blog.html
+      pre https://github.com/dansup/bulma-templates/blob/master/templates/blog.html
 </template>
 
 <script>
@@ -58,7 +51,8 @@ export default {
     return {
       clubId: clubId,
       club: this.$store.getters.getClub(clubId),
-      blog: {}
+      blog: {},
+      selectedTab: 1
     }
   },
   // Fetch Club Info [Low Priority]

@@ -1,3 +1,4 @@
+// TODO: Update headers [information]
 const pkg = require('./package')
 
 module.exports = {
@@ -10,7 +11,7 @@ module.exports = {
     title: pkg.name,
     htmlAttrs: {
       lang: 'es',
-    },
+    }, 
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },

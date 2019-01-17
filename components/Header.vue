@@ -1,10 +1,12 @@
 <template lang="pug">
   .hero-head
-    header.navbar.is-link
+    header.navbar.is-white.has-shadow
       .container
         .navbar-brand
           a.navbar-item(href="/")
-            img(src='https://bulma.io/images/bulma-type-white.png', alt='Logo')
+            // https://bulma.io/images/bulma-logo.png
+            // https://bulma.io/images/bulma-type-black.png
+            img(src='https://bulma.io/images/bulma-logo.png', alt='Logo')
           span.navbar-burger.burger(data-target='navbarMenuHeroC')
             span
             span

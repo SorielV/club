@@ -1,16 +1,22 @@
 <template lang="pug">
-  section
-    .container
-      pre {{ club }}
+  section.section
+    .container.is-fluid
+      Club(:club="club")
 </template>
 
 <script>
+import Club from '@/components/club'
+
 export default {
   layout: 'club',
+  transition: 'slide-left',
   head() {
     return {
       title: this.club.identifer || 'Club'
     }
+  },
+  components: {
+    Club
   },
   async fetch ({ store, params: { clubId } }) {
     try {

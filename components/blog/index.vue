@@ -1,4 +1,4 @@
-<!--template lang="pug">
+<template lang="pug">
   section
     .card.article
       .card-content
@@ -11,10 +11,19 @@
               a(href='#') @{{ blog.username }}
               |  {{ blog.createdAt }}
         .content.article-body
-          pre {{ blog.content }}
-</template-->
+          VueShowdown(
+            :markdown="blog.content"
+            flavor="github"
+            :options="{ emoji: true }"
+          )
+          br
+          .tags
+            a.tag.is-gray(
+              v-for="tag in blog.tag || []"
+            ) {{ tag.tag }}
+</template>
 
-<template lang="pug">
+<!--template lang="pug">
   .blog-container
     .blog-header
       .blog-cover
@@ -25,7 +34,12 @@
       .content
         h1.title
           a(href='#') {{ blog.title }}
-        p {{ blog.content }}
+        // Dangerous
+        VueShowdown(
+          :markdown="blog.content"
+          flavor="github"
+          :options="{ emoji: true }"
+        )
       .tags
         span(v-for="tag in blog.tag").tag.is-light {{ tag.tag }}
         span(v-for="topic in blog.topic").tag.is-dark {{ topic.topic }}
@@ -33,20 +47,42 @@
       .container
         .has-text-centered
           p Some information
-</template>
+</template-->
 
 <script>
+import { VueShowdown } from 'vue-showdown'
+// import marked from 'marked'
+
 export default {
+  components: {
+    VueShowdown
+  },
   props: {
     blog: {
       type: Object,
       required: true
+    },
+    isClub: {
+      type: Boolean,
+      required: false,
+      default() {
+        return false
+      }
+    }
+  },
+  methods: {
+    marked(md) {
+      /*
+      const html = marked(md, { sanitize: true })
+      console.log(html)
+      */
+      return md
     }
   }
 }
 </script>
 
-<style scoped>
+<!--style scoped>
 .blog-container {
   background: #fff;
   border-radius: 5px;
@@ -125,10 +161,10 @@ export default {
   margin: 0 auto;
   width: 80%;
 }
-</style>
+</style-->
 
 
-<!--style scoped>
+<style scoped>
 .articles {
   margin: 5rem 0;
   margin-top: -200px;
@@ -139,11 +175,11 @@ export default {
 }
 .author-image {
   position: absolute;
-  top: -30px;
+  top: -49px;
   left: 50%;
-  width: 60px;
-  height: 60px;
-  margin-left: -30px;
+  width: 98px;
+  height: 98px;
+  margin-left: -49px;
   border: 3px solid #ccc;
   border-radius: 50%;
 }
@@ -177,4 +213,4 @@ div.column.is-8:first-child {
 .promo-block .container {
   margin: 1rem 5rem;
 }
-</style-->
+</style>

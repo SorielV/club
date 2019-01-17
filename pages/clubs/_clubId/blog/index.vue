@@ -1,10 +1,19 @@
 <template lang="pug">
-  section
+  section.section
     .container
-      pre 
-        p Blogs
+      div.is-flex
+        h1.title Blogs
+        button.button.is-danger(
+          v-if="$store.state.isAuth && $store.getters.isMemberOfClub(clubId)"
+          @click="gotoCreateBlog"
+        ) Add
+      hr
       section
-        b-tabs.block(position='is-centered')
+        b-tabs.block(
+          expanded
+          position='is-centered'
+          v-model="selectedTab"
+        )
           b-tab-item(label='raw')
             section(v-for="blog in blogs")
               pre(@click="gotoBlog(blog)") {{ blog }}
@@ -12,11 +21,21 @@
           b-tab-item(label='component')
             section(v-for="blog in blogs")
               Blog(@click="gotoBlog(blog)" :blog="blog")
-            pre https://bulma.io/documentation/layout/media-object/
 </template>
 
 <script>
 import Blog from '@/components/blog/info.vue'
+
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+    .replace(/^-+/, '') // Trim - from start of text
+    .replace(/-+$/, '') // Trim - from end of text
+}
 
 export default {
   layout: 'club',
@@ -43,7 +62,15 @@ export default {
     return {
       clubId: clubId,
       club: this.$store.getters.getClub(clubId),
-      blogs: []
+      blogs: [],
+      selectedTab: 1,
+      modals: {
+        blog: {
+          isActive: false,
+          isLoading: false,
+          data: {}
+        }
+      }
     }
   },
   async mounted() {
@@ -75,6 +102,16 @@ export default {
     }
   },
   methods: {
+    slugify(word) {
+      return slugify(word)
+    },
+    // Mostrar modal crear blog
+    gotoCreateBlog() {
+      const { clubId } = this
+      this.$router.push(
+        `/clubs/${clubId}/blog/create`
+      )
+    },
     gotoBlog({ id: blogId }) {
       const { clubId } = this
       this.$router.push(

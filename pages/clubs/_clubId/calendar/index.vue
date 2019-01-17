@@ -1,7 +1,7 @@
 <template lang="pug">
   section.section
     Calendar(
-      style="height: 600px"
+      style="height: 85vh"
       :calendars="calendarList"
       :schedules="scheduleList"
       :week="week"
@@ -49,25 +49,25 @@ export default {
       scheduleList: [{
           id: '1',
           calendarId: '1',
-          title: 'my schedule',
+          title: 'Charla :v',
           body: 'Occaecat elit non in qui elit tempor officia mollit id. Et id id exercitation voluptate anim sit Lorem elit. Nulla dolore dolore culpa amet enim sunt et amet reprehenderit eiusmod quis enim. Excepteur nisi ut ea enim esse eu minim anim anim. Eu dolor nisi amet sint dolor velit excepteur veniam laboris enim adipisicing. Enim do eu ullamco et et dolore magna sit amet sit Lorem duis laborum. Irure fugiat eiusmod culpa magna tempor.',
           category: 'time',
           dueDateClass: '',
-          start: '2019-01-10T17:30:00+09:00',
-          end: '2019-01-10T17:31:00+09:00'
+          start: '2019-01-14T17:30:00+09:00',
+          end: '2019-01-17T17:31:00+09:00'
         },
         {
           id: '2',
           calendarId: '1',
-          title: 'second schedule',
+          title: 'Otra charla :v',
           category: 'time',
           dueDateClass: '',
-          start: '2019-01-08T17:30:00+09:00',
-          end: '2019-01-12T17:31:00+09:00'
+          start: '2019-01-16T17:30:00+09:00',
+          end: '2019-01-17T17:31:00+09:00'
         }
       ],
       view: 'week',
-      taskView: false,
+      taskView: true,
       scheduleView: ['time'],
       week: {
         narrowWeekend: true,
@@ -88,7 +88,7 @@ export default {
         tooltip: 'Los Angeles'
       }],
       disableDblClick: true,
-      isReadOnly: false,
+      isReadOnly: true,
       template: {
         milestone: function (schedule) {
           return `<span style="color:red;">${schedule.title}</span>`;

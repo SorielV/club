@@ -1,6 +1,6 @@
 <template lang="pug">
   .hero-head
-    header.navbar.is-black
+    header.navbar.is-black.has-shadow
       .container
         .navbar-brand
           a.navbar-item(href="/")
@@ -27,6 +27,10 @@
               :to="'/clubs/' + this.$route.params.clubId + '/calendar'"
             )
               | Calendario
+            nuxt-link.navbar-item(
+              :to="'/clubs/' + this.$route.params.clubId + '/resources'"
+            )
+              | Recursos
             template(v-if="$store.state.isAuth")
               span.navbar-item
                 p Logged as {{ $store.state.user.username }}
@@ -38,7 +42,7 @@
                   span Registro
               span.navbar-item
                 nuxt-link.button.is-danger(
-                  :to="'/clubs/' + this.$route.params.clubId + '/login'"
+                  :to="'/login'"
                 )
                   span.icon
                     i.mdi.mdi-github

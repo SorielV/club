@@ -1,5 +1,5 @@
 <template lang="pug">
-  section
+  section.box.mas-my-1(style="margin: 1rem")
     article.media
       figure.media-left
         p.image.is-64x64
@@ -11,8 +11,11 @@
             small @{{ blog.username }}
             small {{ blog.createdAt }}
             br
-            p.title {{ blog.title }}
+            a.title(@click="goto") {{ blog.title }}
             p.subtitle {{ blog.description }}
+          // TODO: Tag page
+          .tags
+            a.tag(v-for="tag in blog.tag || []") {{ tag.tag }}
         nav.level.is-mobile
           .level-left
             a.level-item
@@ -34,6 +37,23 @@ export default {
     blog: {
       type: Object,
       required: true
+    },
+      isClub: {
+      type: Boolean,
+      required: false,
+      default() {
+        return false
+      }
+    }
+  },
+  methods: {
+    goto() {
+      const { clubId = null } = this.$route.params
+      const { id: blogId } = this.blog
+      const path = clubId
+        ? `/clubs/${clubId}/blog/${blogId}`
+        : `/blog/${blogId}`
+      this.$router.push(path)
     }
   }
 }

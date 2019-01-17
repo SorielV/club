@@ -1,7 +1,7 @@
 <template lang="pug">
   div
     Header
-    .notification.is-link.has-m-1.has-text-centered
+    //-.notification.is-link.has-m-1.has-text-centered
       button.delete
       span(v-if="$store.getters.isMemberOfClub(clubId)")
         | Bienvenido Miembro 

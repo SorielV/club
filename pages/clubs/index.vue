@@ -14,7 +14,10 @@
       hr
     .container
       section
-        b-tabs.block(position='is-centered')
+        b-tabs.block(
+          v-model="selectedTab"
+          position='is-centered'
+        )
           b-tab-item(label='raw')
             section(v-for="club in clubs")
               pre(@click="toClub(club)") {{ club }}
@@ -27,7 +30,7 @@
                   br
             template(v-else)
               .row.columns.is-multiline.is-centered
-                .column.is-7(v-for="club in clubs")
+                .column.is-11(v-for="club in clubs")
                   Club(@click="toClub(club)" :club="club")
                   br
             pre https://github.com/dansup/bulma-templates/blob/master/templates/cards.html
@@ -143,6 +146,7 @@ export default {
     return {
       format: 'simple',
       clubs: [],
+      selectedTab: 1,
       modals: {
         club: {
           isActive: false,
