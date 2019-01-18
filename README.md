@@ -1,22 +1,31 @@
-# foo
+### Installation
 
-> My awesome Nuxt.js project
-
-## Build Setup
-
-``` bash
-# install dependencies
-$ npm install
-
-# serve with hot reload at localhost:3000
-$ npm run dev
-
-# build for production and launch server
-$ npm run build
-$ npm start
-
-# generate static project
-$ npm run generate
+Clonar repositorio
+```sh
+$ git clone https://github.com/SorielV/foo.git -b temp
 ```
 
-For detailed explanation on how things work, checkout [Nuxt.js docs](https://nuxtjs.org).
+[Node.js](https://nodejs.org/) 
+[Postgres](https://www.postgresql.org/)
+
+Iniciar servicio de postgres y crear base de datos
+```sh
+psql -U postgres -W
+```
+```slq
+postgres=# CREATE DATABASE foo;
+postgres=# \q
+```
+Restaurar base de datos
+```sh
+psql -U postgres -d foo server/database/foo.dump
+```
+
+Instalar dependencias and devDepencencias e iniciar el server.
+
+```sh
+$ cd foo
+$ npm install
+$ npm run dev
+```
+http://localhost:3000
