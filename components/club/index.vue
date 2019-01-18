@@ -6,10 +6,10 @@
         img(src='https://code.support/wp-content/uploads/2016/04/js.png', alt='Image')
     .card-content
       .media
-        .media-left
+        //-.media-left
           figure.image.is-96x96
             img(src='https://cdn2.iconfinder.com/data/icons/nodejs-1/512/nodejs-512.png', alt='Image')
-        .media-content
+        //-.media-content
           p.title.is-4.no-padding {{ club.identifier }}
           p
             span.title.is-6

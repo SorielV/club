@@ -9,11 +9,12 @@
         | Unete a la aventura :V 
     section
       nuxt.main-container
+    Footer
     Dev
       section
         pre Club
         pre {{ $store.getters.getClub(clubId) }}
-    Footer
+    
 </template>
 
 <script>

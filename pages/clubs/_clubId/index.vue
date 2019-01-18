@@ -1,7 +1,15 @@
 <template lang="pug">
   section.section
-    .container.is-fluid
+    .container
       Club(:club="club")
+      br
+      .columns.is-multiline
+        .column.is-two-thirds
+          .box
+            pre Blogs
+        .column.is-auto
+          .box
+            pre Events
 </template>
 
 <script>
@@ -49,4 +57,3 @@ export default {
   }
 }
 </script>
-
