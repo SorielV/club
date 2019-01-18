@@ -18,7 +18,7 @@ postgres=# \q
 ```
 Restaurar base de datos
 ```sh
-psql -U postgres -d foo server/database/foo.dump
+psql -U postgres -d foo foo/server/database/foo.dump
 ```
 
 Instalar dependencias and devDepencencias e iniciar el server.
