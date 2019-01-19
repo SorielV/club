@@ -54,6 +54,83 @@ const processRows = ({ rows, fields }, index) => {
   )
 }
 
+const orderByBuilder = (table, orderBy, allowed = []) => {
+  return orderBy.reduce(
+    (fields, prop) => {
+      const hasSortDirection = field.chartAt(field.length - 1).match(/[+-]/)
+      let sortDirection
+
+      if (hasSortDirection && ['-', '+'].includes(field.chartAt(field.length - 1))) {
+        sortDirection = field.chartAt(field.length - 1) === '-'
+          ? 'desc'
+          : 'asc'
+      } else {
+        sortDirection = 'asc'
+      }
+
+      const field = hasSortDirection
+        ? field.substring(0, field.length - 2)
+        : field
+
+      if (isNullOrUndefined(allowed)) {
+        return field
+      }
+      
+      if (Array.isArray(allowed)) {
+        if (allowed.includes(field)) {
+          fields.push(`"${table}"."${field}"`)
+        }
+      } else {
+        if (allowed === field) {
+          fields.push(`"${table}"."${field}"`)
+        }
+      }
+
+      return fields
+    },
+    []
+  )
+}
+
+const whereAndOptionsBlogBuilder = (table, options, allowed = []) => {
+  const { page, perPage, orderBy, ...where } = options
+  if (
+    (!isNullOrUndefined(page) && isNaN(page)) || 
+    (!isNullOrUndefined(perPage) && isNaN(page))
+  ) {
+
+  } else {
+    if (page <= 0) {
+      throw new Error('Pamatro page no valido')
+    }
+    if (perPage <= 0) {
+      throw new Error('Pamatro page no valido')
+    }
+  }
+
+  let query = whereBlogBuilder(table, where, allowed)
+
+  query += ' LIMIT ' + (
+      perPage
+        ? Number.parseInt(perPage)
+        : 15
+  )
+
+  query += ' OFFSET ' + (
+    page 
+      ? ((Number.parseInt(page) - 1) * (perPage ?  Number.parseInt(perPage) : 15))
+      : 0
+  )
+
+  const orderOptions = orderByBuilder(table, orderBy)
+
+  if (orderOptions.length > 0) {
+    query += ' ORDER BY ' + orderOptions.join(',')
+  }
+
+  return query
+}
+
 const whereBlogBuilder = (table, where, allowed = []) => {
   const isAllOperatorsAllowed =
     isNullOrUndefined(allowed) || Array.isArray(allowed)
@@ -344,7 +421,8 @@ export const BlogAPI = {
             title: '=~',
             slug: '=~',
             visibility: '='
-          }).join(' and '),
+          }).join(' and ') +
+          optionsBuilder(Blog.table, option),
           { rowMode: 'array' }
         )
         const offset = 3 // Field in userProfile

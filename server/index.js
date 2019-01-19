@@ -41,13 +41,13 @@ async function start() {
   // Init Nuxt.js
   // Build only in dev mode
 
-  // /*
+  /*
   const nuxt = new Nuxt(config)
   if (config.dev) {
     const builder = new Builder(nuxt)
     await builder.build()
   }
-  // */
+  */
 
   // Give nuxt middleware to express
   app
@@ -59,8 +59,7 @@ async function start() {
     .use('/api/v1/blogtag', BlogTagAPI)
     .use('/api/v1/blogtopic', BlogTopicAPI)
 
-  app
-    .use(nuxt.render)
+  // app.use(nuxt.render)
 
   app.listen(port, host)
   consola.ready({
