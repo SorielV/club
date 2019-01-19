@@ -4,20 +4,32 @@
       Club(:club="club")
       br
       .columns.is-multiline
-        .column.is-two-thirds
-          .box
-            pre Blogs
-        .column.is-auto
-          .box
-            pre Events
+        .column.is-two-thirds(v-observe-visibility="visibleBlog")
+          section(
+            v-if="isVisibleBlog"
+          )
+            .box
+              pre Blogs
+        .column.is-auto(v-observe-visibility="visibleEvent")
+          section(
+            v-if="isLoaderEvent"
+          )
+            .box
+              pre Events
 </template>
 
 <script>
 import Club from '@/components/club'
+// Lazy component render
+// URL: https://github.com/Akryum/vue-observe-visibility
+import { ObserveVisibility } from 'vue-observe-visibility'
 
 export default {
   layout: 'club',
   transition: 'slide-left',
+  directives: {
+    ObserveVisibility
+  },
   head() {
     return {
       title: this.club.identifer || 'Club'
@@ -39,10 +51,33 @@ export default {
     const { clubId } = this.$route.params
     return {
       clubId: clubId,
-      club: this.$store.getters.getClub(clubId)
+      club: this.$store.getters.getClub(clubId),
+      // Lazy load components
+      isLoaderBlog: false,
+      isLoaderEvent: false
+    }
+  },
+  computed: {
+    isVisibleBlog() {
+      return this.isLoaderBlog
+    },
+    isVisibleEvent() {
+      return this.isVisibleEvent
     }
   },
   methods: {
+    visibleBlog(isVisible) {
+      if (!this.isLoaderBlog && isVisible) {
+        this.isLoaderBlog = true
+        console.warn('[render] lazyBlog')
+      }
+    },
+    visibleEvent(isVisible) {
+      if (!this.isLoaderEvent && isVisible) {
+        this.isLoaderEvent = true
+        console.warn('[render] lazyBlogEvent')
+      }
+    },
     pushRoute(route) {
       switch(route) {
         case 'blog':
