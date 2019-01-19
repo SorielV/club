@@ -36,9 +36,7 @@ module.exports = {
   /*
   ** Plugins to load before mounting the App
   */
-  plugins: [
-    '~/plugins/v-observe-visibilityobserve-visibility.js'
-  ],
+  plugins: [],
 
   /*
   ** Nuxt.js modules

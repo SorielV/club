@@ -15,13 +15,8 @@
         .level-left
           a.level-item
             span.icon.is-small
-              i.mdi.mdi-reply
-          a.level-item
-            span.icon.is-small
-              i.mdi.mdi-retweet
-          a.level-item
-            span.icon.is-small
               i.mdi.mdi-heart
+            | 1000
     .media-right
       button.delete
 </template>

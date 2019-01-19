@@ -1,5 +1,5 @@
 <template lang="pug">
-  section.box.mas-my-1(style="margin: 1rem")
+  section.box
     article.media
       figure.media-left
         p.image.is-64x64
@@ -18,15 +18,17 @@
             a.tag(v-for="tag in blog.tag || []") {{ tag.tag }}
         nav.level.is-mobile
           .level-left
-            a.level-item
+            //-a.level-item
               span.icon.is-small
-                i.fas.fa-reply
-            a.level-item
+                i.mdi.mdi-reply
+            .level-item
               span.icon.is-small
-                i.fas.fa-retweet
-            a.level-item
+                i.mdi.mdi-comment-text-multiple
+              | 1000
+            .level-item
               span.icon.is-small
-                i.fas.fa-heart
+                i.mdi.mdi-heart
+              | 1111
       .media-right
         button.delete
 </template>
@@ -58,3 +60,4 @@ export default {
   }
 }
 </script>
+

@@ -1,7 +1,7 @@
 <template lang="pug">
   // TODO: Club view
   .card.large
-    .card-image
+    //-.card-image
       figure.image
         img(src='https://code.support/wp-content/uploads/2016/04/js.png', alt='Image')
     .card-content

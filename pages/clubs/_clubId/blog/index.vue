@@ -9,22 +9,34 @@
         ) Add
       hr
       section
-        b-tabs.block(
-          expanded
-          position='is-centered'
-          v-model="selectedTab"
+        BlogListView(
+          :fetch='true'
+          :fetchParams="{ idClub: clubId, format: 'info'}"
+          @click="gotoBlog(blog)"
         )
-          b-tab-item(label='raw')
-            section(v-for="blog in blogs")
-              pre(@click="gotoBlog(blog)") {{ blog }}
-              br
-          b-tab-item(label='component')
-            section(v-for="blog in blogs")
-              Blog(@click="gotoBlog(blog)" :blog="blog")
+        // Debug
+          b-tabs.block(
+            expanded
+            position='is-centered'
+            v-model="selectedTab"
+          )
+            b-tab-item(label='raw')
+              section(v-for="blog in blogs")
+                pre(@click="gotoBlog(blog)") {{ blog }}
+                br
+            b-tab-item(label='component')
+              BlogListView(
+                :fetch='true'
+                :fetchParams="{
+                  idClub: clubId,
+                  format: 'info''
+                }"
+                @click="gotoBlog(blog)"
+              )
 </template>
 
 <script>
-import Blog from '@/components/blog/info.vue'
+import { ListView as BlogListView } from '@/components/blog'
 
 const slugify = (text) => {
   return text
@@ -40,7 +52,7 @@ const slugify = (text) => {
 export default {
   layout: 'club',
   components: {
-    Blog
+    BlogListView
   },
   head() {
     return {
@@ -62,7 +74,7 @@ export default {
     return {
       clubId: clubId,
       club: this.$store.getters.getClub(clubId),
-      blogs: [],
+      
       selectedTab: 1,
       modals: {
         blog: {
@@ -77,20 +89,6 @@ export default {
     const { clubId } = this
 
     try {
-      const {
-        data: { data: blogs }
-      } = await this.$axios.get(
-        '/api/v1/blog',
-        {
-          params: {
-            idClub: clubId,
-            format: 'info'
-          }
-        }
-      )
-
-      this.blogs = blogs
-
       if (!this.$store.getters.hasClubInformation(clubId)) {
         await this.$store.dispatch('getClub', clubId)
         this.club = this.$store.getters.getClub(clubId)

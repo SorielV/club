@@ -8,21 +8,27 @@
           section(
             v-if="isVisibleBlog"
           )
-            .box
-              pre Blogs
+            BlogListView(
+              :fetch='true'
+              :fetchParams='{ clubId }'
+            )
         .column.is-auto(v-observe-visibility="visibleEvent")
           section(
             v-if="isLoaderEvent"
           )
-            .box
-              pre Events
+            EventListView(
+              :fetch='true'
+              :fetchParams='{ clubId }'
+            )
 </template>
 
 <script>
-import Club from '@/components/club'
 // Lazy component render
 // URL: https://github.com/Akryum/vue-observe-visibility
 import { ObserveVisibility } from 'vue-observe-visibility'
+import Club from '@/components/club'
+import { ListView as BlogListView } from '@/components/blog'
+import { ListView as EventListView } from '@/components/event'
 
 export default {
   layout: 'club',
@@ -36,7 +42,9 @@ export default {
     }
   },
   components: {
-    Club
+    Club,
+    BlogListView,
+    EventListView
   },
   async fetch ({ store, params: { clubId } }) {
     try {

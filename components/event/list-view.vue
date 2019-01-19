@@ -1,21 +1,18 @@
 <template lang="pug">
   section
-    section(v-for="blog in data" :key="blog.id")
-      BlogInfo.blog-info(:blog="blog" @report="reportBlog")
-    // Redireccion, etc
-    slot(name="footer")
+    section(v-for="event in data" :key="event.id")
+      EventInfo.event-info(:event="event")
 </template>
 
 <script>
-import BlogInfo from './info.vue'
+import EventInfo from './info.vue'
 
-// Lista de Blogs 
 export default {
   components: {
-    BlogInfo
+    EventInfo
   },
   props: {
-    blogs: {
+    events: {
       type: Array,
       required: false,
       default: () => []
@@ -41,7 +38,7 @@ export default {
   },
   data() {
     return {
-      data: this.blogs.slice()
+      data: this.events.slice()
     }
   },
   async created() {
@@ -51,12 +48,14 @@ export default {
 
     try {
       const { 
-        data: { data: blogs }
+        data: { data: events }
       } = await this.$axios
-        .get('/api/v1/blog',{
+        .get('/api/v1/event',{
           params: this.fetchParams
         })
-      this.data = blogs
+
+      console.log(events)
+      this.data = events
     } catch(err) {
       console.error(err)
     }
@@ -71,7 +70,7 @@ export default {
 </script>
 
 <style scoped>
-.blog-info {
+.event-info {
   margin-bottom: 0.75rem !important;
 }
 </style>
