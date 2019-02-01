@@ -1,4 +1,4 @@
-import Schemata from './../../../utils/Schema'
+import Schemata from './../../utils/Schema'
 
 export const Model = {
   table: 'Tag',

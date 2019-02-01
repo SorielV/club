@@ -10,7 +10,7 @@
           )
             BlogListView(
               :fetch='true'
-              :fetchParams='{ clubId }'
+              :fetchParams='{ clubId, limit: 5 }'
             )
         .column.is-auto(v-observe-visibility="visibleEvent")
           section(

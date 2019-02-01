@@ -22,7 +22,59 @@ import Tag from '../../../../../models/blog/tag';
 import { isNullOrUndefined } from 'util';
 
 const knex = Knex({ client: 'pg' })
-const whereEquals = (obj, table) => obj.keys(obj).reduce(prop => `"${table}"."${prop}" = '${obj[prop]}'`)
+
+// Busquedas solo por idTag, idTopic, slug, title, 
+// Busquedas en sitio solo por keywords
+const VBlog = {
+  table: 'VBlog',
+  fields: {
+    id: Number,
+    idClub: Number,
+    idUser: Number,
+    title: String,
+    slug: String,
+    description: String,
+    visibility: Number,
+    idUser: Number,
+    username: String,
+    firstName: String,
+    profileImage: String,
+    createdAt: Date
+  },
+  allowedFilter: [
+    'idUser',
+    'idClub',
+    'username',
+    'title',
+    'slug'
+  ]
+}
+
+const VBlogTopic = {
+  table: "VBlogTopic",
+  fields: {
+    idBlog: Number,
+    id: Number,
+    topic: String,
+    slug: String
+  },
+  allowedFilter: [
+    'id'
+  ]
+}
+
+const VBlogTag = {
+  table: "VBlogTag",
+  fields: {
+    idBlog: Number,
+    id: Number,
+    tag: String,
+    slug: String
+  },
+  allowedFilter: [
+    'id',
+  ]
+}
 
 const Visibility = {
   PUBLIC: 0,
@@ -30,38 +82,36 @@ const Visibility = {
   UNPUBLISHED: 2,
 }
 
-const processRow = ({ rows, fields }, index) => {
-  if (isNullOrUndefined(rows) || rows.length === 0) {
-    return {}
-  }
+const whereEquals = (obj, table) => obj.keys(obj).reduce(prop => `"${table}"."${prop}" = '${obj[prop]}'`)
 
-  return castObjectfromArraywithIndex(
-    rows,
-    fields.map(({ name }) => name),
-    index
-  )
+const processRow = ({ rows, fields }, index) => {
+  return isNullOrUndefined(rows) || rows.length === 0
+    ? {}
+    : castObjectfromArraywithIndex(
+      rows,
+      fields.map(({ name }) => name),
+      index
+    )
 }
 
 const processRows = ({ rows, fields }, index) => {
-  if (isNullOrUndefined(rows) || rows.length === 0) {
-    return []
-  }
-
-  return castObjectfromCollectionWithIndex(
-    groupBy(rows, ([id]) => id),
-    fields.map(({ name }) => name),
-    index
-  )
+  return (isNullOrUndefined(rows) || rows.length === 0)
+    ? []
+    : castObjectfromCollectionWithIndex(
+      groupBy(rows, ([id]) => id),
+      fields.map(({ name }) => name),
+      index
+    )
 }
 
 const orderByBuilder = (table, orderBy, allowed = []) => {
   return orderBy.reduce(
     (fields, prop) => {
-      const hasSortDirection = field.chartAt(field.length - 1).match(/[+-]/)
+      const hasSortDirection = prop.chartAt(prop.length - 1).match(/[+-]/)
       let sortDirection
 
-      if (hasSortDirection && ['-', '+'].includes(field.chartAt(field.length - 1))) {
-        sortDirection = field.chartAt(field.length - 1) === '-'
+      if (hasSortDirection && ['-', '+'].includes(prop.chartAt(prop.length - 1))) {
+        sortDirection = prop.chartAt(prop.length - 1) === '-'
           ? 'desc'
           : 'asc'
       } else {
@@ -69,8 +119,8 @@ const orderByBuilder = (table, orderBy, allowed = []) => {
       }
 
       const field = hasSortDirection
-        ? field.substring(0, field.length - 2)
-        : field
+        ? prop.substring(0, prop.length - 2)
+        : prop
 
       if (isNullOrUndefined(allowed)) {
         return field
@@ -176,59 +226,6 @@ const whereBlogBuilder = (table, where, allowed = []) => {
   )
 }
 
-// Busquedas solo por idTag, idTopic, slug, title, 
-// Busquedas en sitio solo por keywords
-const VBlog = {
-  table: 'VBlog',
-  fields: {
-    id: Number,
-    idClub: Number,
-    idUser: Number,
-    title: String,
-    slug: String,
-    description: String,
-    visibility: Number,
-    idUser: Number,
-    username: String,
-    firstName: String,
-    profileImage: String,
-    createdAt: Date
-  },
-  allowedFilter: [
-    'idUser',
-    'idClub',
-    'username',
-    'title',
-    'slug'
-  ]
-}
-
-const VBlogTopic = {
-  table: "VBlogTopic",
-  fields: {
-    idBlog: Number,
-    id: Number,
-    topic: String,
-    slug: String
-  },
-  allowedFilter: [
-    'id'
-  ]
-}
-
-const VBlogTag = {
-  table: "VBlogTag",
-  fields: {
-    idBlog: Number,
-    id: Number,
-    tag: String,
-    slug: String
-  },
-  allowedFilter: [
-    'id',
-  ]
-}
-
 const getTopicsQuery = (idBlog) => {
   // No search
   return `
@@ -299,6 +296,24 @@ const whereTopic = (topics) => {
     )
   `
   return query
+}
+
+/**
+ * Req.query
+ */
+const parseBlogQueryParams = (table, options, allowedFilterProps, allowedOrderProps) => {
+  const {
+    format = 'simple',
+    page,
+    perPage,
+    orderBy,
+    fields,
+    tag,
+    topic,
+    ...where
+  } = options
+
+  
 }
 
 export const BlogAPI = {
@@ -421,8 +436,7 @@ export const BlogAPI = {
             title: '=~',
             slug: '=~',
             visibility: '='
-          }).join(' and ') +
-          optionsBuilder(Blog.table, option),
+          }).join(' and '),
           { rowMode: 'array' }
         )
         const offset = 3 // Field in userProfile

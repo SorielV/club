@@ -52,13 +52,14 @@ export default {
     try {
       const { 
         data: { data: blogs }
-      } = await this.$axios
-        .get('/api/v1/blog',{
+      } = await this.$axios.get('/api/v1/blog', {
           params: this.fetchParams
         })
+
       this.data = blogs
+      this.$emit('loaded')
     } catch(err) {
-      console.error(err)
+      this.$emit('error', err)
     }
   },
   methods: {

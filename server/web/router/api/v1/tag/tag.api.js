@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import Controller from './topic.controller'
+import Controller from './tag.controller'
 import { ErrorHandle, HandleAuth, isAuth } from './../../../../middleware'
 
 const router = Router()

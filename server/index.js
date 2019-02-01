@@ -10,6 +10,7 @@ import { BlogAPI } from './web/router/api/v1/blog'
 import { BlogTagAPI, BlogTopicAPI } from './web/router/api/v1/blog'
 import { CalendarAPI, EventAPI  } from './web/router/api/v1/calendar'
 import { LoginAPI } from './web/router/api/v1/login'
+import { TagAPI, TopicAPI } from './web/router/api/v1/catalog'
  
 const app = express()
 const host = process.env.HOST || '127.0.0.1'
@@ -41,13 +42,13 @@ async function start() {
   // Init Nuxt.js
   // Build only in dev mode
 
-  /*
+  // /*
   const nuxt = new Nuxt(config)
   if (config.dev) {
     const builder = new Builder(nuxt)
     await builder.build()
   }
-  */
+  // */
 
   // Give nuxt middleware to express
   app
@@ -57,9 +58,10 @@ async function start() {
     .use('/api/v1/calendar', CalendarAPI)
     .use('/api/v1/event', EventAPI)
     .use('/api/v1/blogtag', BlogTagAPI)
-    .use('/api/v1/blogtopic', BlogTopicAPI)
+    .use('/api/v1/tag', TagAPI)
+    .use('/api/v1/topic', TopicAPI)
 
-  // app.use(nuxt.render)
+  app.use(nuxt.render)
 
   app.listen(port, host)
   consola.ready({

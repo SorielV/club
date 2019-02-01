@@ -117,9 +117,9 @@ export const formatFields = (data) => {
 
 export const formatAllowedOptions = ({
   _sort = '',
-  _limit = 0,
-  _offset = 0,
-  _page = 1,
+  _perPage = null,
+  _offset = null,
+  _page = null,
   _fields = '',
   ..._where
 } = {},
@@ -129,7 +129,7 @@ export const formatAllowedOptions = ({
   allowed = ['id']
 } = {}
 ) => {
-  const fields = [].concat(_fields.trim() 
+  const fields = [].concat(_fields.trim()
     ? allowNested
       ? formatFields(_fields)
       : _fields.split(',')
@@ -189,20 +189,15 @@ export const formatAllowedOptions = ({
     []
   )
 
-  const result = {}
-
-
-  /**
-   * select ...select  ...from ...where ...orderby limit offset
-   */
+  let result = {}
 
   result.select = fields
   result.from = table
 
   if (where.length) result.where = where
   if (orderBy.length) result.orderBy = orderBy
-  if (_limit) result.limit = Number.parseInt(_limit)
-  if (_offset) result.offset = Number.parseInt(_offset)
+  if (_perPage) result.limit = Number.parseInt(_perPage)
+  if (_offset) result.offset = Number.parseInt((_page|| 15) * _perPage)
 
   return result
 }

@@ -9,9 +9,28 @@
         ) Add
       hr
       section
+        // Skeleton
+        div(v-show="isLoadingBlog")
+          div(v-for="n in [1,2,3,4,5,6,7]")
+            ContentLoader(
+              :height='120'
+              :width='400'
+              :speed='2'
+              primaryColor='#f3f3f3'
+              secondaryColor='#ecebeb'
+            )
+              rect(x='70', y='15', rx='4', ry='4', width='117', height='6.4')
+              rect(x='70', y='35', rx='3', ry='3', width='85', height='6.4')
+              rect(x='0', y='80', rx='3', ry='3', width='380', height='6.4')
+              rect(x='0', y='100', rx='3', ry='3', width='380', height='6.4')
+              rect(x='0', y='120', rx='3', ry='3', width='350', height='6.4')
+              circle(cx='30', cy='30', r='30')
+        // Blog
         BlogListView(
           :fetch='true'
-          :fetchParams="{ idClub: clubId, format: 'info'}"
+          :fetchParams="{ idClub: clubId, format: 'info', page: 1, limit: 10}"
+          @loaded="isLoadedBlog"
+          @error="loderBlogError"
           @click="gotoBlog(blog)"
         )
         // Debug
@@ -36,6 +55,7 @@
 </template>
 
 <script>
+import { ContentLoader } from "vue-content-loader"
 import { ListView as BlogListView } from '@/components/blog'
 
 const slugify = (text) => {
@@ -52,7 +72,8 @@ const slugify = (text) => {
 export default {
   layout: 'club',
   components: {
-    BlogListView
+    BlogListView,
+    ContentLoader
   },
   head() {
     return {
@@ -74,7 +95,8 @@ export default {
     return {
       clubId: clubId,
       club: this.$store.getters.getClub(clubId),
-      
+      /* Load Layout */
+      isLoadingBlog: true,
       selectedTab: 1,
       modals: {
         blog: {
@@ -100,6 +122,13 @@ export default {
     }
   },
   methods: {
+    isLoadedBlog() {
+      this.isLoadingBlog = false
+    },
+    loderBlogError(err) {
+      console.log(err)
+      this.loadBlogError = err.message
+    },
     slugify(word) {
       return slugify(word)
     },

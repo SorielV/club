@@ -179,8 +179,6 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
         .replace('\'default\'', 'default')
       )
 
-      console.log(item)
-
       // Reset Proxy
       this.constructor.prototype._isSet = false
       for(const prop in item) {
