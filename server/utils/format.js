@@ -1,11 +1,8 @@
-import { isNullOrUndefined } from "util";
+import { isNullOrUndefined } from 'util'
 
 // Include fields
-const formatNested = (...words) => (
-  words
-    .reduce(word => `"${word}"`, [])
-    .join('.')
-)
+const formatNested = (...words) =>
+  words.reduce(word => `"${word}"`, []).join('.')
 
 export const mergeObjectWithReference = (object, target) => {
   for (const key in object) {
@@ -33,8 +30,8 @@ export const groupBy = (arr, fn) => {
 }
 
 /**
- * 
- * @param {page, perPage} param0 
+ *
+ * @param {page, perPage} param0
  * @return {page, perPage, offset}
  */
 export const pageOptions = ({ page = 1, perPage = 12 }) => {
@@ -53,90 +50,85 @@ export const pageOptions = ({ page = 1, perPage = 12 }) => {
 
 export const likeness = (a, b) => {
   const arr = new Set(b)
-  return a.filter((el) => arr.has(el))
+  return a.filter(el => arr.has(el))
 }
 
 export const diff = (a, b) => {
   const arr = new Set(b)
-  return a.filter((el) => arr.has(el))
+  return a.filter(el => arr.has(el))
 }
 
-export const include = function (table, fields, nestedName = null) {
+export const include = function(table, fields, nestedName = null) {
   return !fields || fields === '*'
     ? this.map(formatNested)
     : [].concat(fields).reduce((arr, field) => {
-      if (this.includes(field)) {
-        const fieldName = `"${table}"."${field}"` +
-        nestedName 
-          ? ` as "${nestedName.toLowerCase()}.${field}"`
-          : ''
-        arr.push(fieldName)
-      }
-      return arr
-    }, [])
+        if (this.includes(field)) {
+          const fieldName =
+            `"${table}"."${field}"` + nestedName
+              ? ` as "${nestedName.toLowerCase()}.${field}"`
+              : ''
+          arr.push(fieldName)
+        }
+        return arr
+      }, [])
 }
 
-// Exclude fields 
-export const exclude = function (table, _fields, nestedName = false) {
+// Exclude fields
+export const exclude = function(table, _fields, nestedName = false) {
   const fields = [].concat(_fields)
   return this.reduce((arr, field) => {
     if (!fields.includes(field)) {
-      const fieldName = `"${table}"."${field}"` + (
-        nestedName
-          ? ` as "${nestedName.toLowerCase()}.${field}"`
-          : ''
-      )
+      const fieldName =
+        `"${table}"."${field}"` +
+        (nestedName ? ` as "${nestedName.toLowerCase()}.${field}"` : '')
       arr.push(fieldName)
     }
     return arr
   }, [])
 }
 
-export const formatFields = (data) => {
-  return !data.includes('(') 
+export const formatFields = data => {
+  return !data.includes('(')
     ? data.split(',')
-    : data.split(',').reduce(
-        (arr, field) => {
-          const nestedIndex = field.indexOf('(')
-          if (nestedIndex === -1) {
-            arr.push(field)
-          } else {
-            const prop = field.substr(0, nestedIndex)
-            arr.push(
-              ...field
-                .substring(nestedIndex + 1, field.length - 1)
-                .split('.')
-                .map(field => prop + '.' + field)
-            )
-          }
-          return arr
-        },
-        []
-    )
+    : data.split(',').reduce((arr, field) => {
+        const nestedIndex = field.indexOf('(')
+        if (nestedIndex === -1) {
+          arr.push(field)
+        } else {
+          const prop = field.substr(0, nestedIndex)
+          arr.push(
+            ...field
+              .substring(nestedIndex + 1, field.length - 1)
+              .split('.')
+              .map(field => prop + '.' + field)
+          )
+        }
+        return arr
+      }, [])
 }
 
-export const formatAllowedOptions = ({
-  _sort = '',
-  _perPage = null,
-  _offset = null,
-  _page = null,
-  _fields = '',
-  ..._where
-} = {},
-{ 
-  table = '',
-  allowNested = false,
-  allowed = ['id']
-} = {}
+export const formatAllowedOptions = (
+  {
+    _sort = '',
+    _perPage = null,
+    _offset = null,
+    _page = null,
+    _fields = '',
+    ..._where
+  } = {},
+  { table = '', allowNested = false, allowed = ['id'] } = {}
 ) => {
-  const fields = [].concat(_fields.trim()
-    ? allowNested
-      ? formatFields(_fields)
-      : _fields.split(',')
-    : [])
+  const fields = [].concat(
+    _fields.trim()
+      ? allowNested
+        ? formatFields(_fields)
+        : _fields.split(',')
+      : []
+  )
 
-  const orderBy = [].concat(_sort.trim() ? _sort.trim().split(',') : []).reduce(
-    (obj, prop) => {
+  const orderBy = []
+    .concat(_sort.trim() ? _sort.trim().split(',') : [])
+    .reduce((obj, prop) => {
       if (!prop) {
         return obj
       }
@@ -145,49 +137,32 @@ export const formatAllowedOptions = ({
       if (hasOrder) {
         obj.push({
           column: prop.substr(1),
-          order: prop[0] === '-'
-            ? 'desc'
-            : 'asc'
+          order: prop[0] === '-' ? 'desc' : 'asc'
         })
       }
       return obj
-    },
-    []
-  )
+    }, [])
 
-  const where = Object.keys(_where).reduce(
-    (obj, prop) => {
-      const simbol = prop[prop.length - 1]
-      const hasOperator = !Boolean(simbol.match(/[\w\d]/))
+  const where = Object.keys(_where).reduce((obj, prop) => {
+    const simbol = prop[prop.length - 1]
+    const hasOperator = !Boolean(simbol.match(/[\w\d]/))
 
-      const field = hasOperator
-        ? prop.substring(0, prop.length - 1)
-        : prop
+    const field = hasOperator ? prop.substring(0, prop.length - 1) : prop
 
-      if (allowed.length) {
-        if (!allowed.includes(field)) return obj
-      }
+    if (allowed.length) {
+      if (!allowed.includes(field)) return obj
+    }
 
-      if (!hasOperator) {
-        obj.push([field, _where[prop]])
-      } else if (simbol.match(/[<>]/)) {
-        obj.push([
-          field,
-          simbol,
-          _where[prop]
-        ])
-      } else if (simbol.match(/[!~]/)) {
-        obj.push([
-          field,
-          simbol === '!' ? '!=' : 'like',
-          _where[prop]
-        ])
-      }
+    if (!hasOperator) {
+      obj.push([field, _where[prop]])
+    } else if (simbol.match(/[<>]/)) {
+      obj.push([field, simbol, _where[prop]])
+    } else if (simbol.match(/[!~]/)) {
+      obj.push([field, simbol === '!' ? '!=' : 'like', _where[prop]])
+    }
 
-      return obj
-    },
-    []
-  )
+    return obj
+  }, [])
 
   let result = {}
 
@@ -197,7 +172,7 @@ export const formatAllowedOptions = ({
   if (where.length) result.where = where
   if (orderBy.length) result.orderBy = orderBy
   if (_perPage) result.limit = Number.parseInt(_perPage)
-  if (_offset) result.offset = Number.parseInt((_page|| 15) * _perPage)
+  if (_offset) result.offset = Number.parseInt((_page || 15) * _perPage)
 
   return result
 }
@@ -206,9 +181,9 @@ export const createObjectFromArray = (values, keys) =>
   keys.reduce((acc, key, i) => {
     acc[key] = values[i]
     return acc
-  }, {});
+  }, {})
 
-export const mergeObject = (target, { ...object })  => {
+export const mergeObject = (target, { ...object }) => {
   for (let prop in object) {
     if (object.hasOwnProperty(prop)) {
       target[prop] = object[prop]
@@ -218,8 +193,7 @@ export const mergeObject = (target, { ...object })  => {
 }
 
 // TODO: A best way of clone object
-export const cloneObject = (object) => JSON.parse(JSON.stringify(object))
-
+export const cloneObject = object => JSON.parse(JSON.stringify(object))
 
 /* 
 Alternative https://hashrocket.com/blog/posts/faster-json-generation-with-postgresql
@@ -227,28 +201,35 @@ Alternative https://hashrocket.com/blog/posts/faster-json-generation-with-postgr
 */
 
 /**
- * @param {array}  
+ * @param {array}
  * @param {*} properties
  * @param {*} index
  */
-export const castObjectfromArraywithIndex = ([...samples], [...props], index) => {
+export const castObjectfromArraywithIndex = (
+  [...samples],
+  [...props],
+  index
+) => {
   console.time('castObjectfromArraywithIndex')
   const template = {}
   let startIndex = 0
 
   if (index[0] === 0) {
-    Object.assign(template, createObjectFromArray(samples[0], props.slice(0, index[1] + 1)))
+    Object.assign(
+      template,
+      createObjectFromArray(samples[0], props.slice(0, index[1] + 1))
+    )
     startIndex = 1
   }
 
-  // Utils Generales 
+  // Utils Generales
   const keysOfArrayProperties = index
     .slice(startIndex, index.length - 1)
-    .map(index => props[index + 1].split(".")[0])
+    .map(index => props[index + 1].split('.')[0])
 
   const properties = props.map(prop => {
-    if (prop.includes(".")) {
-      const [, key] = prop.split(".")
+    if (prop.includes('.')) {
+      const [, key] = prop.split('.')
       return key
     }
     return prop
@@ -259,10 +240,11 @@ export const castObjectfromArraywithIndex = ([...samples], [...props], index) =>
     return obj
   }, {})
 
-  const arrLimits = keysOfArrayProperties.map((v, i) => (
-    [index[startIndex + i] + 1, index[startIndex + i + 1] + 1])
-  )
-  const arrProps = arrLimits.map(limit => (properties.slice(...limit)))
+  const arrLimits = keysOfArrayProperties.map((v, i) => [
+    index[startIndex + i] + 1,
+    index[startIndex + i + 1] + 1
+  ])
+  const arrProps = arrLimits.map(limit => properties.slice(...limit))
 
   Object.assign(template, cloneObject(arrayProperties))
   const keys = cloneObject(arrayProperties)
@@ -286,25 +268,35 @@ export const castObjectfromArraywithIndex = ([...samples], [...props], index) =>
   return template
 }
 
-export const castObjectfromCollectionWithIndex = ([...collection], [...props], index) => {
+export const castObjectfromCollectionWithIndex = (
+  [...collection],
+  [...props],
+  index
+) => {
   console.time('castObjectfromCollectionWithIndex')
-  
+
   const template = {}
   let startIndex = 0
 
   if (index[0] === 0) {
-    Object.assign(template, createObjectFromArray(new Array(index[1] + 1).fill(null), props.slice(0, index[1] + 1)))
+    Object.assign(
+      template,
+      createObjectFromArray(
+        new Array(index[1] + 1).fill(null),
+        props.slice(0, index[1] + 1)
+      )
+    )
     startIndex = 1
   }
 
-  // Utils Generales 
+  // Utils Generales
   const keysOfArrayProperties = index
     .slice(startIndex, index.length - 1)
-    .map(index => props[index + 1].split(".")[0])
+    .map(index => props[index + 1].split('.')[0])
 
   const properties = props.map(prop => {
-    if (prop.includes(".")) {
-      const [, key] = prop.split(".")
+    if (prop.includes('.')) {
+      const [, key] = prop.split('.')
       return key
     }
     return prop
@@ -315,15 +307,19 @@ export const castObjectfromCollectionWithIndex = ([...collection], [...props], i
     return obj
   }, {})
 
-  const arrLimits = keysOfArrayProperties.map((v, i) => (
-    [index[startIndex + i] + 1, index[startIndex + i + 1] + 1])
-  )
-  const arrProps = arrLimits.map(limit => (properties.slice(...limit)))
+  const arrLimits = keysOfArrayProperties.map((v, i) => [
+    index[startIndex + i] + 1,
+    index[startIndex + i + 1] + 1
+  ])
+  const arrProps = arrLimits.map(limit => properties.slice(...limit))
   Object.assign(template, cloneObject(arrayProperties))
 
   const items = collection.map(([...samples]) => {
     const item = cloneObject(template)
-    mergeObjectWithReference(createObjectFromArray(samples[0], props.slice(0, index[1] + 1)), item)
+    mergeObjectWithReference(
+      createObjectFromArray(samples[0], props.slice(0, index[1] + 1)),
+      item
+    )
 
     const keys = cloneObject(arrayProperties)
 
@@ -349,18 +345,17 @@ export const castObjectfromCollectionWithIndex = ([...collection], [...props], i
   return items
 }
 
-export const getProperties = (data, props) => (
+export const getProperties = (data, props) =>
   [].concat(props).reduce((obj, prop) => {
     obj[prop] = data[prop]
     return obj
-  } , {})
-)
+  }, {})
 
 /**
  * https://gist.github.com/mathewbyrne/1280286
  * @Author {mathewbyrne}
  */
-export const slugify = (text) => {
+export const slugify = text => {
   return text
     .toString()
     .toLowerCase()

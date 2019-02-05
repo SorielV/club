@@ -63,11 +63,11 @@
             b-field(
               label="Temas"
             )
-              b-taginput(v-model='catalogs.topics'
-                :data='catalogs.filteredTopics'
+              b-taginput(v-model='blog.topic'
+                :data='catalogs.topics'
                 autocomplete=''
                 :allow-new='false'
-                field='blog.topic'
+                field='topic'
                 icon='label'
                 placeholder='Elige temas eg. Javascript, Ciencia, ML, etc'
                 @typing='getFilteredTopics'
@@ -78,11 +78,11 @@
             b-field(
               label="Tags"
             )
-              b-taginput(v-model='catalogs.tags'
-                :data='catalogs.filteredTags'
+              b-taginput(v-model='blog.tag'
+                :data='catalogs.tags'
                 autocomplete=''
                 :allow-new='false'
-                field='blog.tag'
+                field='tag'
                 icon='label'
                 placeholder='Agrega nuevos tags'
                 @typing='getFilteredTags'
@@ -136,18 +136,33 @@ export default {
         filteredTags: [],
         filteredTopics: []
       },
+      isFetch: {
+        tags: false,
+        topics: false
+      },
       selectedTab: 0,
       blog: {
         title: '',
         slug: '',
         description: '',
         content: '',
-        visibility: 0
+        visibility: 0,
+        topic: [],
+        tag: []
       }
     }
   },
   methods: {
-    getFilteredTags(text) {
+    async getFilteredTags(text) {
+      if (!this.isFetch.tags) {
+        const {
+          data: { data } 
+        } = await this.$axios.get('/api/v1/tag')
+
+        this.catalogs.tags = data
+        this.isFetch.tags = true
+      }
+
       const { tags } = this.catalogs
       this.filteredTags = tags.filter(({ slug }) => {
         return slug
@@ -156,7 +171,16 @@ export default {
           .indexOf(text.toLowerCase()) >= 0
       })
     },
-    getFilteredTopics(text) {
+    async getFilteredTopics(text) {
+      if (!this.isFetch.topics) {
+        const {
+          data: { data } 
+        } = await this.$axios.get('/api/v1/topic')
+
+        this.catalogs.topics = data
+        this.isFetch.topics = true
+      }
+
       const { topics } = this.catalogs
       this.filteredTags = topics.filter(({ slug }) => {
         return slug
