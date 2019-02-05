@@ -2,19 +2,14 @@ const Knex = require('knex')
 const knex = Knex({ client: 'pg' })
 const faker = require('faker')
 
-
 const env = process.env.DB || 'local'
 const { [env]: database } = require('./../database.json')
 const { Pool } = require('pg')
 const connection = new Pool(database)
 
+const normalize = obj => Object.keys(obj).map(prop => ({ [prop]: obj[prop] }))
 
-const normalize = (obj) => (
-  Object.keys(obj)
-    .map(prop => ({ [prop]: obj[prop]}))
-)
-
-const userQuery = () => (
+const userQuery = () =>
   knex('User')
     .returning('id')
     .insert({
@@ -27,9 +22,8 @@ const userQuery = () => (
     })
     .toString()
     .replace(/'default'/g, 'default')
-)
 
-const userInfoQuery = (idUser) => (
+const userInfoQuery = idUser =>
   knex('UserInfo')
     .returning('id', 'idUser')
     .insert({
@@ -45,11 +39,11 @@ const userInfoQuery = (idUser) => (
     })
     .toString()
     .replace(/'default'/g, 'default')
-)
 
 let i = 0
-for(; i < 5e3; i++) {
-  connection.query(userQuery())
+for (; i < 5e3; i++) {
+  connection
+    .query(userQuery())
     .then(({ rows: [{ id }] }) => {
       console.log(id)
       return connection.query(userInfoQuery(id))
@@ -57,7 +51,7 @@ for(; i < 5e3; i++) {
     .then(({ rows: [item] }) => {
       console.log('Added', item)
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err.message)
     })
 }
