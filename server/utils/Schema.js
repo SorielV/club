@@ -20,6 +20,8 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     }
   })
 
+
+  // Proxy fields
   const proxy = Object.keys(fields).reduce(
     (obj, prop) => {
       obj[prop] = null
@@ -28,6 +30,7 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
     {}
   )
 
+  // Validation Method
   const validateProp = (obj, prop, _value) => {
     // Null || Undefined
     let value = _value
@@ -54,7 +57,9 @@ function Schema(name, { table, primaryKey, fields, options, validation }) {
         }
 
         if (fields[prop].minLength && value.length <= fields[prop].minLength) {
-          throw new Error(`Campo ${prop} debera ser de longitud mayor a ${fields[prop].minLength}`)
+          throw new Error(
+            `Campo ${prop} debera ser de longitud mayor a ${fields[prop].minLength}`
+          )
         }
 
         if (fields[prop].lowercase) value = value.toLowerCase()
