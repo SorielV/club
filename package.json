@@ -5,7 +5,7 @@
   "author": "SorielV",
   "private": true,
   "scripts": {
-    "dev": "cross-env client-env=true NODE_ENV=development nodemon --exec babel-node --presets @babel/preset-env server/index.js --watch server",
+    "dev": "cross-env client_env=true NODE_ENV=development nodemon --exec babel-node --presets @babel/preset-env server/index.js --watch server",
     "seo-dev": "nuxt generate & cross-env NODE_ENV=development nodemon --exec babel-node --presets @babel/preset-env server/index.js --watch server",
     "start": "cross-env NODE_ENV=production node server/index.js",
     "build": "nuxt build",

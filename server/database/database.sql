@@ -250,7 +250,7 @@ CREATE TABLE "Event"(
 );
 
 select
-    "User".id,
+    "User".id as "idA",
     "User".username,
     "UserInfo"."firstName",
     "UserInfo"."lastName",
@@ -261,7 +261,3 @@ select
   from "User"
     inner join "UserInfo" on "User".id = "UserInfo"."idUser"
  where "User".id = 1;
-
-
-/static/profile/soriel.jpg
-

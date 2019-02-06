@@ -1,3 +1,4 @@
+import path from 'path'
 import express from 'express'
 import morgan from 'morgan'
 import bodyParser from 'body-parser'
@@ -45,15 +46,17 @@ const config = {
 }
 
 async function start() {
-  // Init Nuxt.js
-  // Build only in dev mode
+  let nuxt
 
-  if (process.env['client-env']) {
-    const nuxt = new Nuxt(config)
+  if (process.env['client_env']) {
+    nuxt = new Nuxt(config)
     if (config.dev) {
       const builder = new Builder(nuxt)
       await builder.build()
     }
+  } else {
+    // Static files
+    app.use(express.static(path.join(__dirname + './../dist')))
   }
 
   // TODO: Update Global API Endpoints
@@ -67,7 +70,7 @@ async function start() {
     .use('/api/v1/tag', TagAPI)
     .use('/api/v1/topic', TopicAPI)
 
-  if (process.env['client-env']) {
+  if (process.env['client_env']) {
     app.use(nuxt.render)
   }
 

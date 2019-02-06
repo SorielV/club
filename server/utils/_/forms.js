@@ -1,5 +1,5 @@
 import { Model } from './../models/blog/blog'
-import { isNullOrUndefined } from 'util';
+import { isNullOrUndefined } from 'util'
 
 const StringField = (label, { required = false, maxLength = null }) => {
   // Type [text, textarea]
@@ -52,12 +52,10 @@ const DateField = (label, { required = false }) => {
 }
 
 // TODO: Form
-const EnumField = () => {
-
-}
+const EnumField = () => {}
 
 const Field = (type, ...args) => {
-  switch(type) {
+  switch (type) {
     case String:
       return StringField(...args)
     case Number:
@@ -69,14 +67,13 @@ const Field = (type, ...args) => {
   }
 }
 
-const Form = (model) => {
+const Form = model => {
   console.table(Object.keys(model))
-  const fields = Object.keys(model)
-    .map(prop => (
-      Field(model[prop].type, prop, model[prop])
-    ))
-  
-  fields.forEach((field) => {
+  const fields = Object.keys(model).map(prop =>
+    Field(model[prop].type, prop, model[prop])
+  )
+
+  fields.forEach(field => {
     console.log(field)
   })
 }
