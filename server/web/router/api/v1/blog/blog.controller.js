@@ -17,10 +17,9 @@ import {
   groupBy
 } from './../../../../../utils/format'
 
-const knex = Knex({ client: 'pg' })
+/* View Schemas */
 
-// Busquedas solo por idTag, idTopic, slug, title,
-// Busquedas en sitio solo por keywords
+// BlogView
 const VBlog = {
   table: 'VBlog',
   fields: {
@@ -40,6 +39,7 @@ const VBlog = {
   allowedFilter: ['idUser', 'idClub', 'username', 'title', 'slug']
 }
 
+// BlogTopicView
 const VBlogTopic = {
   table: 'VBlogTopic',
   fields: {
@@ -51,6 +51,7 @@ const VBlogTopic = {
   allowedFilter: ['id']
 }
 
+// BlogTagView
 const VBlogTag = {
   table: 'VBlogTag',
   fields: {
@@ -62,12 +63,143 @@ const VBlogTag = {
   allowedFilter: ['id']
 }
 
+const VBlogSocial = {}
+
+const knex = Knex({ client: 'pg' })
+
+// Fetch Options
+const fetchOptions = {
+  /*
+    Fields
+    [
+      Blog => [
+        "id", "idClub", "idUser", "title", "slug", "content",
+        "visibility", "createdAt", "updatedAt"
+      ]
+      UserProfile => ["username", "profileImage", "firstName"]
+    ]
+  */
+  simple: {
+    pagination: {
+      page: 1,
+      perPage: 15
+    },
+    options: {
+      orderBy: [['createdAt', 'asc'], ['updatedAt', 'asc']]
+    },
+    allowed: {
+      where: {
+        id: '=',
+        idClub: '=',
+        idUser: '=',
+        title: '=~',
+        slug: '=~',
+        visibility: '=<>'
+      },
+      orderBy: ['title', 'slug', 'visibility', 'createdAt', 'updatedAt']
+    },
+    // Knex Exception
+    alias: {}
+  },
+  /*
+    Fields
+    [
+      Blog => [
+        "id", "idClub", "idUser", "title", "slug", "description",
+        "visibility", "createdAt", "updatedAt",
+      ]
+      UserProfile => ["username", "profileImage", "firstName"]
+      // TODO: Score 
+      // TBlogSocial => ['likes', 'comments', 'lastCount']
+      VBlogTag => ["...tag"]
+      VBlogTopic => ["..topic"]
+    ]
+  */
+  info: {
+    pagination: {
+      page: 1,
+      perPage: 15
+    },
+    options: {
+      orderBy: [['createdAt', 'asc']]
+    },
+    allowed: {
+      where: {
+        id: '=',
+        idClub: '=',
+        idUser: '=',
+        title: '=~',
+        slug: '=~',
+        visibility: '=<>'
+      },
+      orderBy: [
+        'title',
+        'slug',
+        'visibility',
+        'createdAt',
+        'updatedAt',
+        'likes',
+        'comments'
+      ]
+    },
+    alias: {
+      likes: `"${VBlogSocial.table}"."likes"`,
+      comments: `"${VBlogSocial.table}"."comments"`
+    }
+  },
+  /*
+    Fields
+    [
+      Blog => [
+        "id", "idClub", "idUser", "title", "slug", "content",
+        "visibility", "createdAt", "updatedAt"
+      ]
+      UserProfile => ["username", "profileImage", "firstName"]
+      VBlogTag => ["...tag"]
+      VBlogTopic => ["..topic"]
+    ]
+  */
+  blog: {
+    pagination: {
+      page: 1,
+      perPage: 15
+    },
+    options: {
+      orderBy: [['createdAt', 'asc']]
+    },
+    allowed: {
+      where: {
+        id: '=',
+        idClub: '=',
+        idUser: '=',
+        title: '=~',
+        slug: '=~',
+        visibility: '=<>'
+      },
+      orderBy: [
+        'title',
+        'slug',
+        'visibility',
+        'createdAt',
+        'updatedAt',
+        'likes',
+        'comments'
+      ]
+    },
+    alias: {
+      likes: `"${VBlogSocial.table}"."likes"`,
+      comments: `"${VBlogSocial.table}"."comments"`
+    }
+  }
+}
+
 const Visibility = {
   PUBLIC: 0,
   PRIVATE: 1,
   UNPUBLISHED: 2
 }
 
+/* Funcions */
 const whereEquals = (obj, table) =>
   obj.keys(obj).reduce(prop => `"${table}"."${prop}" = '${obj[prop]}'`)
 
@@ -203,6 +335,13 @@ const whereBlogBuilder = (table, where, allowed = []) => {
   }, [])
 }
 
+/* Queries */
+
+/**
+ * @description Return query to fetch Blog Topics using idBLog
+ * @param {Number} idBlog
+ * @returns {String} query
+ */
 const getTopicsQuery = idBlog => {
   // No search
   return `
@@ -211,12 +350,49 @@ const getTopicsQuery = idBlog => {
   `
 }
 
+/**
+ * @description Return query to fetch Blog Tags using idBLog
+ * @param {Number} idBlog
+ * @returns {String} query
+ */
 const getTagsQuery = idBlog => {
   // No search
   return `
     select * from "VBlogTag"
     where "VBlogTag"."idBlog" = ${Number.parseInt(idBlog)};
   `
+}
+
+/**
+ * @description Return where query to conditional search on Blog using TagIds
+ * @param {Array | Number} idTag
+ * @returns {String} query
+ */
+const whereTagQuery = tags => {
+  const query = `
+    "${Blog.table}"."id" in (
+      select "${BlogTag.table}"."idBlog" as "id" from "${BlogTag.table}"
+        where "${BlogTag.table}"."idTag" in (${[].concat(tags).join(',')})
+      group by "${BlogTag.table}"."idBlog"
+    )
+  `
+  return query
+}
+
+/**
+ * @description Return where query to conditional search on Blog using TopicIds
+ * @param {Array | Number} idTopic
+ * @returns {String} query
+ */
+const whereTopicQuery = topics => {
+  const query = `
+    "${Blog.table}"."id" in (
+      select "${BlogTopic.table}"."idBlog" as "id" from "${BlogTopic.table}"
+        where "${BlogTopic.table}"."idTopic" in (${[].concat(topics).join(',')})
+      group by "${BlogTopic.table}"."idBlog"
+    )
+  `
+  return query
 }
 
 const getBlogInfoQuery = (_options, allowed) => {
@@ -264,49 +440,6 @@ const getBlogCompleteQuery = (blogExclude = 'content') => {
   }"."idUser"
   `
   return query
-}
-
-const whereTag = tags => {
-  const query = `
-    "${Blog.table}"."id" in (
-      select "${BlogTag.table}"."idBlog" as "id" from "${BlogTag.table}"
-        where "${BlogTag.table}"."idTag" in (${[].concat(tags).join(',')})
-      group by "${BlogTag.table}"."idBlog"
-    )
-  `
-  return query
-}
-
-const whereTopic = topics => {
-  const query = `
-    "${Blog.table}"."id" in (
-      select "${BlogTopic.table}"."idBlog" as "id" from "${BlogTopic.table}"
-        where "${BlogTopic.table}"."idTopic" in (${[].concat(topics).join(',')})
-      group by "${BlogTopic.table}"."idBlog"
-    )
-  `
-  return query
-}
-
-/**
- * Req.query
- */
-const parseBlogQueryParams = (
-  table,
-  options,
-  allowedFilterProps,
-  allowedOrderProps
-) => {
-  const {
-    format = 'simple',
-    page,
-    perPage,
-    orderBy,
-    fields,
-    tag,
-    topic,
-    ...where
-  } = options
 }
 
 export const BlogAPI = {
@@ -472,7 +605,7 @@ export const BlogAPI = {
   },
   getTopic: async (req, res, next) => {
     const { idClub } = req.query
-    const items = await Blog.query(getTopicQuery(idClub))
+    const items = await Blog.query(getTopicsQuery(idClub))
     return res
       .status(200)
       .json({ data: item })
