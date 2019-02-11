@@ -16,7 +16,7 @@ import { LoginAPI } from './web/router/api/v1/login'
 import { TagAPI, TopicAPI } from './web/router/api/v1/catalog'
 
 const app = express()
-const host = process.env.HOST || '127.0.0.1'
+const host = process.env.HOST || '0.0.0.0'
 const port = process.env.PORT || 3000
 
 app.set('port', port)
