@@ -1,0 +1,79 @@
+swagger: "2.0"
+info:
+  description: "Club."
+  version: "1.0.0"
+  title: "Club"
+  termsOfService: "A"
+  contact:
+    email: "[xxsorielxx@gmail.com]"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "127.0.0.0.1:3000"
+basePath: "/api/v1"
+schemes:
+- "https"
+- "http"
+paths:
+  /blog:
+    post:
+      summary: Adds new blog
+      requestBody:
+        content:
+          application/json:     # Media type
+            schema:             # Request body contents
+              $ref: '#/components/schemas/User'   # Reference to an object
+            examples:    # Child of media type
+              Jessica:   # Example 1
+                value:
+                  id: 10
+                  name: Jessica Smith
+              Ron:       # Example 2
+                value:
+                  id: 11
+                  name: Ron Stewart
+      responses:
+        '200':
+          description: OK
+    get:
+      summary: Get blogs
+      parameters:
+      - in: query
+        name: format
+        required: false
+        schema:
+          type: string
+          enum:
+            - simple
+            - info
+            - blog
+          default: info
+        description: The way to get the information
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          default: 1
+        description: The number of items to skip before starting to collect the result set
+      - in: query
+        name: perPage
+        required: false
+        schema:
+          type: integer
+          default: 12
+        description: The numbers of items to return
+  /blog/{id}:
+    summary: 
+    parameters:
+    - in: query
+      name: format
+      required: false
+      schema:
+        type: string
+        enum:
+          - simple
+          - info
+          - blog
+        default: info
+      description: The way to get the information
